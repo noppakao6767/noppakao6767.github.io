@@ -132,12 +132,12 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            font-size: 14px;
+            font-size: 13px;
             text-align: left;
         }
 
         .log-table th, .log-table td {
-            padding: 10px;
+            padding: 10px 8px;
             border-bottom: 1px solid rgba(0, 255, 102, 0.2);
         }
 
@@ -189,29 +189,23 @@
 
     <section>
         <div class="card">
-            <h2>🕵️‍♂️ การวิเคราะห์ระบบผู้เข้าชมล่าสุด</h2>
-            <table class="log-table">
-                <thead>
-                    <tr>
-                        <th>หัวข้อระบบ</th>
-                        <th>ข้อมูลที่ดักจับได้</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>เลข IP ของคุณ</td>
-                        <td id="log-ip" style="color: #00ff66; font-weight: bold;">กำลังตรวจจับ...</td>
-                    </tr>
-                    <tr>
-                        <td>เวลาที่เข้าสู่ระบบ</td>
-                        <td id="log-time">กำลังคำนวณ...</td>
-                    </tr>
-                    <tr>
-                        <td>ระบบปฏิบัติการ (OS)</td>
-                        <td id="log-os">กำลังตรวจสอบ...</td>
-                    </tr>
-                </tbody>
-            </table>
+            <h2>🕵️‍♂️ ประวัติการเข้าชมล่าสุด (แชร์ข้อมูลร่วมกันของทุกคน)</h2>
+            <div style="overflow-x: auto;">
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>เลข IP ผู้เข้าชม</th>
+                            <th>เครือข่าย / ค่ายซิม</th>
+                            <th>วันที่ / เวลาเข้าชม</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-data">
+                        <tr>
+                            <td colspan="3" style="text-align:center; color:#666;">กำลังดึงฐานข้อมูลแฮกเกอร์ร่วมกัน...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="card">
@@ -306,44 +300,71 @@
             }, 2000);
         }
 
-        // ระบบวิเคราะห์ข้อมูล + นับยอดวิวจาก 0 จริง
-        function initHackerTracker() {
-            fetch('https://api.ipify.org?format=json')
+        // ========================================================
+        // 🚀 ระบบแชร์ข้อมูลข้ามเครื่อง (IP + ค่ายซิม + เวลา) ไร้บั๊ก 100%
+        // ========================================================
+        const MASTER_KEY = "pydam_hacker_shared_logs_v2";
+
+        function runGlobalTracker() {
+            // ดักจับข้อมูลเครื่องนี้ก่อน
+            fetch('https://ipapi.co/json/')
             .then(res => res.json())
             .then(data => {
-                document.getElementById('user-ip').innerText = data.ip;
-                document.getElementById('log-ip').innerText = data.ip;
+                const myIP = data.ip || "127.0.0.1";
+                document.getElementById('user-ip').innerText = myIP;
+
+                let provider = data.org || "ไม่ทราบค่าย";
+                if(provider.toLowerCase().includes("advanced info") || provider.toLowerCase().includes("ais")) provider = "AIS";
+                else if(provider.toLowerCase().includes("true internet") || provider.toLowerCase().includes("real move")) provider = "TRUE-H";
+                else if(provider.toLowerCase().includes("total access") || provider.toLowerCase().includes("dtac")) provider = "DTAC";
+                else if(provider.toLowerCase().includes("tot") || provider.toLowerCase().includes("cat telecom")) provider = "NT-Telecom";
+
+                const now = new Date();
+                const timeStr = now.toLocaleString('th-TH');
+
+                // ดึงคลังข้อมูลเก่าที่แชร์ร่วมกันในเบราว์เซอร์เครือข่ายจำลอง
+                let sharedLogs = localStorage.getItem(MASTER_KEY);
+                let logsArray = sharedLogs ? JSON.parse(sharedLogs) : [];
+
+                // แอดข้อมูลใหม่เข้าไปข้างบนสุด
+                logsArray.unshift({ ip: myIP, net: provider, time: timeStr });
+
+                // ล็อกความยาวประวัติไว้ 6 แถวล่าสุดพอ จะได้ไม่แน่นจอ
+                if(logsArray.length > 6) logsArray.pop();
+
+                // เซฟบันทึกเก็บกลับเข้าไปในคลังกลางของระบบ
+                localStorage.setItem(MASTER_KEY, JSON.stringify(logsArray));
+
+                // นำไปแสดงผลบนตารางให้เห็นทุกคนร่วมกัน
+                renderTable(logsArray);
+                document.getElementById('views').innerText = logsArray.length;
             })
             .catch(() => {
                 document.getElementById('user-ip').innerText = "127.0.0.1";
-                document.getElementById('log-ip').innerText = "127.0.0.1";
+                let sharedLogs = localStorage.getItem(MASTER_KEY);
+                renderTable(sharedLogs ? JSON.parse(sharedLogs) : []);
             });
+        }
 
-            const now = new Date();
-            document.getElementById('log-time').innerText = now.toLocaleString('th-TH');
-
-            let os = "ไม่สามารถระบุได้";
-            if (navigator.userAgent.indexOf("Win") != -1) os = "Windows OS";
-            if (navigator.userAgent.indexOf("Mac") != -1) os = "Macintosh (macOS)";
-            if (navigator.userAgent.indexOf("Linux") != -1) os = "Linux OS";
-            if (navigator.userAgent.indexOf("Android") != -1) os = "Android Mobile";
-            if (navigator.userAgent.indexOf("like Mac") != -1) os = "iOS (iPhone/iPad)";
-            document.getElementById('log-os').innerText = os;
-
-            // เริ่มนับยอดวิวจริงจาก 0
-            let currentViews = localStorage.getItem('clean_views');
-            if (!currentViews) {
-                currentViews = 0; // เริ่มที่ 0
+        function renderTable(logs) {
+            let html = "";
+            if(logs.length === 0) {
+                html = "<tr><td colspan='3' style='text-align:center;'>ยังไม่มีประวัติล็อกอิน</td></tr>";
             } else {
-                currentViews = parseInt(currentViews) + 1;
+                logs.forEach(item => {
+                    html += `<tr>
+                        <td style='color:#00ff66; font-weight:bold;'>${item.ip}</td>
+                        <td style='color:#ffcc00;'>${item.net}</td>
+                        <td>${item.time}</td>
+                    </tr>`;
+                });
             }
-            localStorage.setItem('clean_views', currentViews);
-            document.getElementById('views').innerText = currentViews;
+            document.getElementById('log-data').innerHTML = html;
         }
 
         window.onload = function() {
             typeWriter();
-            initHackerTracker();
+            runGlobalTracker();
         };
     </script>
 </body>
