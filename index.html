@@ -1,4 +1,4 @@
-Myl>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -138,9 +138,15 @@ Myl>
             z-index: 1;
         }
         
-        #views {
+        #views, #user-ip {
             color: #00ff66;
             font-weight: bold;
+        }
+        
+        .ip-box {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -154,8 +160,10 @@ Myl>
             <h1>พี่ดำสุดหล่อ</h1>
             
             <div id="typing"></div>
-            
             <p class="tag">ID: 6767</p>
+            
+            <p class="ip-box">🕵️ YOUR IP: <span id="user-ip">LOADING...</span></p>
+            
             <div class="btns">
                 <a href="https://www.facebook.com/share/1DitXDcF4S/" target="_blank">Facebook</a>
                 <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw" target="_blank">Instagram</a>
@@ -179,12 +187,12 @@ Myl>
     </section>
 
     <footer>
-        <p>© My Name Itอยู่ในช่วงพัฒนา</p>
-        <p>👀 ผู้เข้าชม: <span id="views">6767</span></p>
+        <p>© My Name It</p>
+        <p>👀 ผู้เข้าชมทั้งหมด: <span id="views">6767</span> ครั้ง</p>
     </footer>
 
     <script>
-        // ระบบคำนวณและสั่งดวงดาวให้ขยับ
+        // ระบบอวกาศขยับได้
         const canvas = document.getElementById('space-bg');
         const ctx = canvas.getContext('2d');
         let stars = [];
@@ -210,7 +218,6 @@ Myl>
 
         function animateStars() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             let gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, canvas.width);
             gradient.addColorStop(0, '#0a0e17');
             gradient.addColorStop(1, '#020204');
@@ -227,9 +234,7 @@ Myl>
                 if(s.alpha > 1) s.alpha = 1;
                 
                 ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
-                if(i % 8 === 0) {
-                    ctx.fillStyle = `rgba(0, 255, 102, ${s.alpha})`;
-                }
+                if(i % 8 === 0) ctx.fillStyle = `rgba(0, 255, 102, ${s.alpha})`;
                 ctx.fill();
 
                 s.x += s.vx;
@@ -244,7 +249,7 @@ Myl>
         }
         animateStars();
 
-        // ระบบอักษรพิมพ์ดีดและแฮกเกอร์
+        // ระบบตัวอักษรวิ่ง
         const welcomeText = "ยินดีต้อนรับสู่เว็บไซต์ของพี่ดำสุดหล่อเท่";
         const hackerText = ["ACCESS GRANTED", "CONNECTING...", "LOADING DATA...", "SYSTEM ONLINE", "WELCOME USER"];
         let typingIndex = 0;
@@ -271,8 +276,44 @@ Myl>
             }, 2000);
         }
 
+        // ========================================================
+        // 🚀 ระบบดึง IP และนับยอดวิวจริง (เพิ่มใหม่)
+        // ========================================================
+        
+        // 1. ฟังก์ชันดึงเลข IP ของคนดู
+        function getUserIP() {
+            fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('user-ip').innerText = data.ip;
+            })
+            .catch(error => {
+                document.getElementById('user-ip').innerText = "UNKNOWN";
+            });
+        }
+
+        // 2. ฟังก์ชันนับและเพิ่มยอดวิว (เซฟลงเครื่องคนดูแบบอัตโนมัติ)
+        function updateViews() {
+            let currentViews = localStorage.getItem('page_views');
+            
+            if (!currentViews) {
+                // ถ้าเพิ่งเข้าครั้งแรก ให้เริ่มที่เลข 6767 ตามธีมเดิมพี่ดำ
+                currentViews = 6767;
+            } else {
+                // ถ้าเคยเข้าแล้ว ให้บวกเพิ่มทีละ 1 ยอดวิว
+                currentViews = parseInt(currentViews) + 1;
+            }
+            
+            localStorage.setItem('page_views', currentViews);
+            document.getElementById('views').innerText = currentViews;
+        }
+
+        // สั่งทำงานทั้งหมดตอนโหลดหน้าเว็บ
         window.onload = function() {
             typeWriter();
+            getUserIP();
+            updateViews();
         };
     </script>
 </body>
+</html>
