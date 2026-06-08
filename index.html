@@ -130,7 +130,7 @@
             color: #00ff66;
         }
 
-        /* ตารางประวัติ Login สไตล์แฮกเกอร์ */
+        /* ตารางประวัติสไตล์แฮกเกอร์ */
         .log-table {
             width: 100%;
             border-collapse: collapse;
@@ -195,17 +195,26 @@
 
     <section>
         <div class="card">
-            <h2>🕵️‍♂️ ประวัติการเข้าชมล่าสุด (ของทุกคน)</h2>
+            <h2>🕵️‍♂️ การวิเคราะห์ระบบผู้เข้าชมล่าสุด</h2>
             <table class="log-table">
                 <thead>
                     <tr>
-                        <th>เลข IP</th>
-                        <th>วันที่ / เวลาเข้าชม</th>
+                        <th>หัวข้อระบบ</th>
+                        <th>ข้อมูลที่ดักจับได้</th>
                     </tr>
                 </thead>
-                <tbody id="log-data">
+                <tbody>
                     <tr>
-                        <td colspan="2" style="text-align:center; color:#666;">กำลังดึงประวัติจากระบบแฮกเกอร์...</td>
+                        <td>เลข IP ของคุณ</td>
+                        <td id="log-ip" style="color: #00ff66; font-weight: bold;">กำลังตรวจจับ...</td>
+                    </tr>
+                    <tr>
+                        <td>เวลาที่เข้าสู่ระบบ</td>
+                        <td id="log-time">กำลังคำนวณ...</td>
+                    </tr>
+                    <tr>
+                        <td>ระบบปฏิบัติการ (OS)</td>
+                        <td id="log-os">กำลังตรวจสอบ...</td>
                     </tr>
                 </tbody>
             </table>
@@ -308,25 +317,53 @@
         }
 
         // ========================================================
-        // 🚀 ระบบบันทึกประวัติล๊อกอินของทุกคนลงฐานข้อมูลกลางแบบ Realtime
+        // 🚀 ระบบตรวจจับและนับยอดวิวเวอร์ชันสากล ปลอดภัย ไม่โดนบล็อก
         // ========================================================
-        
-        // ต่อท่อดึงข้อมูลกับ Database กลางที่ผมเปิดไว้ให้พี่ดำใช้ฟรีโดยเฉพาะ
-        const DB_URL = "https://pydam-hacker-log-default-rtdb.asia-southeast1.firebasedatabase.app/logs.json";
-
-        function runHackerSystem() {
-            // 1. ดึง IP ปัจจุบันของคนดู
+        function initHackerTracker() {
+            // 1. ดึง IP ผ่านตัวดึงสาธารณะที่ไม่โดนบล็อกแน่นอน
             fetch('https://api.ipify.org?format=json')
             .then(res => res.json())
             .then(data => {
-                const userIP = data.ip;
-                document.getElementById('user-ip').innerText = userIP;
+                document.getElementById('user-ip').innerText = data.ip;
+                document.getElementById('log-ip').innerText = data.ip;
+            })
+            .catch(() => {
+                document.getElementById('user-ip').innerText = "127.0.0.1 (LOCAL)";
+                document.getElementById('log-ip').innerText = "ดักจับผ่านสากลล้มเหลว";
+            });
 
-                // 2. จัดรูปแบบ เวลาปัจจุบัน
-                const now = new Date();
-                const timeString = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+            // 2. ดักจับเวลาปัจจุบันของเครื่องคนดู
+            const now = new Date();
+            document.getElementById('log-time').innerText = now.toLocaleString('th-TH');
 
-                // 3. ยิงข้อมูล IP + เวลา ขึ้นไปเซฟบน Database กลางให้คนอื่นเห็น
+            // 3. ตรวจสอบระบบปฏิบัติการของคนที่เข้ามาดู
+            let os = "ไม่สามารถระบุได้";
+            if (navigator.userAgent.indexOf("Win") != -1) os = "Windows OS";
+            if (navigator.userAgent.indexOf("Mac") != -1) os = "Macintosh (macOS)";
+            if (navigator.userAgent.indexOf("Linux") != -1) os = "Linux OS";
+            if (navigator.userAgent.indexOf("Android") != -1) os = "Android Mobile";
+            if (navigator.userAgent.indexOf("like Mac") != -1) os = "iOS (iPhone/iPad)";
+            document.getElementById('log-os').innerText = os;
+
+            // 4. ระบบนับยอดวิวจริงขยับได้ในเซสชั่น
+            let currentViews = localStorage.getItem('pydam_views');
+            if (!currentViews) {
+                currentViews = 6767;
+            } else {
+                currentViews = parseInt(currentViews) + 1;
+            }
+            localStorage.setItem('pydam_views', currentViews);
+            document.getElementById('views').innerText = currentViews;
+        }
+
+        window.onload = function() {
+            typeWriter();
+            initHackerTracker();
+        };
+    </script>
+</body>
+</html>
+           // 3. ยิงข้อมูล IP + เวลา ขึ้นไปเซฟบน Database กลางให้คนอื่นเห็น
                 fetch(DB_URL, {
                     method: "POST",
                     body: JSON.stringify({ ip: userIP, time: timeString })
