@@ -58,7 +58,10 @@ margin-bottom:15px;
 h1{
 font-size:42px;
 margin-bottom:10px;
-}
+text-shadow:
+0 0 5px #00ff66,
+0 0 10px #00ff66,
+0 0 20px #00ff66;}
 
 .tag{
 color:#bdbdbd;
@@ -105,7 +108,8 @@ padding:30px;
 color:#888;
 }
 </style></head><body><div class="hero">
-<div class="profile"><img class="avatar" src="IMG_20260419_061914_854.webp"><h1>พี่ดำสุดหล่อ</h1><p class="tag">6767</p><div class="btns">
+<div class="profile"><img class="avatar" src="IMG_20260419_061914_854.webp"><h1>พี่ดำสุดหล่อ</h1>
+  <p id="typing"><div id="clock"></div></p><p class="tag">6767</p><div class="btns">
 <a href="https://www.facebook.com/share/1DitXDcF4S/">Facebook</a>
 <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw">Instagram</a>
 </div></div>
@@ -118,5 +122,42 @@ color:#888;
 <p>Facebook และ Instagram อยู่ด้านบนของเว็บไซต์</p>
 </div></section><footer>
 © My Name It
-</footer></body>
+</footer>
+</script>
+const text = "ยินดีต้อนรับสู่เว็บไซต์ของพี่ดำสุดหล่อเท่";
+let i = 0;
+
+function typeWriter() {
+  if (i < text.length) {
+    document.getElementById("typing").innerHTML += text.charAt(i);
+    i++;
+    setTimeout(typeWriter, 80);
+  }
+}
+
+typeWriter();
+</script>
+
+<script>
+const hackerText = [
+"ACCESS GRANTED",
+"CONNECTING...",
+"LOADING DATA...",
+"SYSTEM ONLINE",
+"WELCOME USER"
+];
+
+let index = 0;
+
+setInterval(() => {
+document.getElementById("typing").innerHTML =
+hackerText[index];
+
+index++;
+if(index >= hackerText.length){
+index = 0;
+}
+},2000);
+</script></body>
 </html>
+<p>👀 ผู้เข้าชม: <span id="views">6767</span></p>
