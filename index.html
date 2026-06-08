@@ -7,106 +7,118 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:sans-serif;
+font-family:Arial,sans-serif;
 }
 
 body{
-background:#0d0d0d;
-color:white;
-}
-
-header{
-height:60vh;
-background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200');
-background-size:cover;
-background-position:center;
-position:relative;
-}
-
-header::after{
-content:"";
-position:absolute;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.6);
-left:0;
-top:0;
+background:#0b0b0b;
+color:#fff;
+overflow-x:hidden;
 }
 
 .hero{
-position:absolute;
-z-index:2;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-text-align:center;
+height:100vh;
+background:url('cover.jpg') center center/cover no-repeat;
+position:relative;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 
-.hero img{
+.hero::before{
+content:'';
+position:absolute;
+inset:0;
+background:rgba(0,0,0,.65);
+backdrop-filter:blur(2px);
+}
+
+.profile{
+position:relative;
+z-index:2;
+text-align:center;
+background:rgba(20,20,20,.6);
+backdrop-filter:blur(10px);
+padding:30px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,.15);
+width:90%;
+max-width:450px;
+}
+
+.avatar{
 width:150px;
 height:150px;
 border-radius:50%;
 border:4px solid white;
+object-fit:cover;
+margin-bottom:15px;
 }
 
-.hero h1{
-margin-top:15px;
-font-size:38px;
+h1{
+font-size:42px;
+margin-bottom:10px;
 }
 
-.hero p{
+.tag{
 color:#bdbdbd;
-}
-
-.social{
-margin-top:15px;
-}
-
-.social a{
-color:white;
-text-decoration:none;
-margin:10px;
-font-size:20px;
-}
-
-section{
-padding:40px 20px;
-max-width:900px;
-margin:auto;
-}
-
-.card{
-background:#1a1a1a;
-padding:20px;
-border-radius:15px;
+font-size:18px;
 margin-bottom:20px;
 }
 
+.btns a{
+display:inline-block;
+padding:12px 20px;
+margin:5px;
+background:#222;
+color:white;
+text-decoration:none;
+border-radius:12px;
+transition:.3s;
+}
+
+.btns a:hover{
+background:#444;
+}
+
+section{
+max-width:1000px;
+margin:auto;
+padding:50px 20px;
+}
+
+.card{
+background:#171717;
+border-radius:20px;
+padding:25px;
+margin-bottom:20px;
+border:1px solid #2b2b2b;
+}
+
 .card h2{
-margin-bottom:10px;
+margin-bottom:15px;
 }
 
 footer{
 text-align:center;
-padding:20px;
-color:#999;
+padding:30px;
+color:#888;
 }
-</style></head><body><header>
-<div class="hero"><img src="https://via.placeholder.com/150"><h1>พี่ดำสุดหล่อ</h1>
-<p>6767</p><div class="social">
+</style></head><body><div class="hero">
+<div class="profile"><img class="avatar" src="cover.jpg"><h1>พี่ดำสุดหล่อ</h1><p class="tag">6767</p><div class="btns">
 <a href="https://www.facebook.com/share/1DitXDcF4S/">Facebook</a>
 <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw">Instagram</a>
 </div></div>
-</header><section><div class="card">
+</div><section><div class="card">
 <h2>เกี่ยวกับผม</h2>
-<p>6767</p>
+<p>มายเนมอิท</p>
 </div><div class="card">
-<h2>เว็บไซต์ของผม</h2>
+<h2>โปรไฟล์</h2>
 <p>ยินดีต้อนรับสู่เว็บไซต์ส่วนตัวของผม</p>
 </div><div class="card">
 <h2>ติดต่อ</h2>
-<p>สามารถติดต่อผ่าน Facebook และ Instagram ได้ตลอด</p>
+<p>Facebook และ Instagram อยู่ด้านบนของเว็บไซต์</p>
 </div></section><footer>
-© 2026 มายเนมอิท
+© My Name It
 </footer></body>
 </html>
