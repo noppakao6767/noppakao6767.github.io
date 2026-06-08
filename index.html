@@ -130,6 +130,28 @@
             color: #00ff66;
         }
 
+        /* ตารางประวัติ Login สไตล์แฮกเกอร์ */
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .log-table th, .log-table td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(0, 255, 102, 0.2);
+        }
+
+        .log-table th {
+            color: #00ff66;
+        }
+
+        .log-table td {
+            color: #ddd;
+        }
+
         footer {
             text-align: center;
             padding: 40px;
@@ -173,16 +195,29 @@
 
     <section>
         <div class="card">
+            <h2>🕵️‍♂️ ประวัติการเข้าชมล่าสุด (ของทุกคน)</h2>
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>เลข IP</th>
+                        <th>วันที่ / เวลาเข้าชม</th>
+                    </tr>
+                </thead>
+                <tbody id="log-data">
+                    <tr>
+                        <td colspan="2" style="text-align:center; color:#666;">กำลังดึงประวัติจากระบบแฮกเกอร์...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
             <h2>เกี่ยวกับผม</h2>
             <p>ผมชื่อเจสันปีนี้อายุ 12 โขบงับ อยู่ ป.2 ชอบภาษาเขมรเพราะมันเมียงปร่ะจริงๆ</p>
         </div>
         <div class="card">
             <h2>โปรไฟล์</h2>
             <p>ยินดีต้อนรับสู่เว็บไซต์ส่วนตัวของพี่ดำสุดหล่อ</p>
-        </div>
-        <div class="card">
-            <h2>ข้อมูลติดต่อของพี่ดำ</h2>
-            <p>Facebook และ Instagram อยู่ด้านบนของเว็บไซต์</p>
         </div>
     </section>
 
@@ -228,18 +263,14 @@
                 let s = stars[i];
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-                
                 s.alpha += (Math.random() - 0.5) * 0.04;
                 if(s.alpha < 0.1) s.alpha = 0.1;
                 if(s.alpha > 1) s.alpha = 1;
-                
                 ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
                 if(i % 8 === 0) ctx.fillStyle = `rgba(0, 255, 102, ${s.alpha})`;
                 ctx.fill();
-
                 s.x += s.vx;
                 s.y += s.vy;
-
                 if (s.x < 0) s.x = canvas.width;
                 if (s.x > canvas.width) s.x = 0;
                 if (s.y < 0) s.y = canvas.height;
@@ -277,42 +308,68 @@
         }
 
         // ========================================================
-        // 🚀 ระบบดึง IP และนับยอดวิวจริง (เพิ่มใหม่)
+        // 🚀 ระบบบันทึกประวัติล๊อกอินของทุกคนลงฐานข้อมูลกลางแบบ Realtime
         // ========================================================
         
-        // 1. ฟังก์ชันดึงเลข IP ของคนดู
-        function getUserIP() {
+        // ต่อท่อดึงข้อมูลกับ Database กลางที่ผมเปิดไว้ให้พี่ดำใช้ฟรีโดยเฉพาะ
+        const DB_URL = "https://pydam-hacker-log-default-rtdb.asia-southeast1.firebasedatabase.app/logs.json";
+
+        function runHackerSystem() {
+            // 1. ดึง IP ปัจจุบันของคนดู
             fetch('https://api.ipify.org?format=json')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                document.getElementById('user-ip').innerText = data.ip;
+                const userIP = data.ip;
+                document.getElementById('user-ip').innerText = userIP;
+
+                // 2. จัดรูปแบบ เวลาปัจจุบัน
+                const now = new Date();
+                const timeString = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+
+                // 3. ยิงข้อมูล IP + เวลา ขึ้นไปเซฟบน Database กลางให้คนอื่นเห็น
+                fetch(DB_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ ip: userIP, time: timeString })
+                })
+                .then(() => {
+                    // 4. หลังจากส่งเสร็จ ให้ไปดึงประวัติของทุกคนลงมาโชว์ในตาราง
+                    loadAllUserLogs();
+                });
             })
-            .catch(error => {
+            .catch(() => {
                 document.getElementById('user-ip').innerText = "UNKNOWN";
+                loadAllUserLogs();
             });
         }
 
-        // 2. ฟังก์ชันนับและเพิ่มยอดวิว (เซฟลงเครื่องคนดูแบบอัตโนมัติ)
-        function updateViews() {
-            let currentViews = localStorage.getItem('page_views');
-            
-            if (!currentViews) {
-                // ถ้าเพิ่งเข้าครั้งแรก ให้เริ่มที่เลข 6767 ตามธีมเดิมพี่ดำ
-                currentViews = 6767;
-            } else {
-                // ถ้าเคยเข้าแล้ว ให้บวกเพิ่มทีละ 1 ยอดวิว
-                currentViews = parseInt(currentViews) + 1;
-            }
-            
-            localStorage.setItem('page_views', currentViews);
-            document.getElementById('views').innerText = currentViews;
+        // ฟังก์ชันดึงประวัติของทุกคนจากฐานข้อมูลมาโชว์บนหน้าเว็บ
+        function loadAllUserLogs() {
+            fetch(DB_URL)
+            .then(res => res.json())
+            .then(data => {
+                if(!data) return;
+                
+                // แปลงข้อมูลที่ได้ให้กลายเป็นอาร์เรย์แล้วเรียงจากใหม่สุดไปเก่าสุด
+                const logArray = Object.values(data).reverse();
+                let tableHtml = "";
+                
+                // นำข้อมูล 6 คนล่าสุดมาแสดงผล
+                const limit = logArray.length > 6 ? 6 : logArray.length;
+                for(let i = 0; i < limit; i++) {
+                    tableHtml += `<tr><td>${logArray[i].ip}</td><td>${logArray[i].time}</td></tr>`;
+                }
+                
+                document.getElementById('log-data').innerHTML = tableHtml;
+                
+                // เอายอดวิวจริงทั้งหมดที่นับรวมจากจำนวนประวัติในฐานข้อมูลมาแสดงผลแทนเลขหลอก
+                document.getElementById('views').innerText = 0 + logArray.length;
+            });
         }
 
         // สั่งทำงานทั้งหมดตอนโหลดหน้าเว็บ
         window.onload = function() {
             typeWriter();
-            getUserIP();
-            updateViews();
+            runHackerSystem();
         };
     </script>
 </body>
