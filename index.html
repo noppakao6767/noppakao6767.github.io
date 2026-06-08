@@ -19,7 +19,6 @@
             position: relative;
         }
 
-        /* พื้นหลังอวกาศเต็มจอ */
         #space-bg {
             position: fixed;
             top: 0;
@@ -39,7 +38,6 @@
             z-index: 1;
         }
 
-        /* กล่องโปรไฟล์กระจกใสเรืองแสง */
         .profile {
             position: relative;
             z-index: 2;
@@ -130,7 +128,6 @@
             color: #00ff66;
         }
 
-        /* ตารางประวัติสไตล์แฮกเกอร์ */
         .log-table {
             width: 100%;
             border-collapse: collapse;
@@ -180,12 +177,9 @@
         <div class="profile">
             <img class="avatar" src="IMG_20260419_061914_854.webp" alt="Profile Picture">
             <h1>พี่ดำสุดหล่อ</h1>
-            
             <div id="typing"></div>
             <p class="tag">ID: 6767</p>
-            
             <p class="ip-box">🕵️ YOUR IP: <span id="user-ip">LOADING...</span></p>
-            
             <div class="btns">
                 <a href="https://www.facebook.com/share/1DitXDcF4S/" target="_blank">Facebook</a>
                 <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw" target="_blank">Instagram</a>
@@ -224,15 +218,11 @@
             <h2>เกี่ยวกับผม</h2>
             <p>ผมชื่อเจสันปีนี้อายุ 12 โขบงับ อยู่ ป.2 ชอบภาษาเขมรเพราะมันเมียงปร่ะจริงๆ</p>
         </div>
-        <div class="card">
-            <h2>โปรไฟล์</h2>
-            <p>ยินดีต้อนรับสู่เว็บไซต์ส่วนตัวของพี่ดำสุดหล่อ</p>
-        </div>
     </section>
 
     <footer>
         <p>© My Name It</p>
-        <p>👀 ผู้เข้าชมทั้งหมด: <span id="views">6767</span> ครั้ง</p>
+        <p>👀 ผู้เข้าชมทั้งหมด: <span id="views">0</span> ครั้ง</p>
     </footer>
 
     <script>
@@ -316,11 +306,8 @@
             }, 2000);
         }
 
-        // ========================================================
-        // 🚀 ระบบตรวจจับและนับยอดวิวเวอร์ชันสากล ปลอดภัย ไม่โดนบล็อก
-        // ========================================================
+        // ระบบวิเคราะห์ข้อมูล + นับยอดวิวจาก 0 จริง
         function initHackerTracker() {
-            // 1. ดึง IP ผ่านตัวดึงสาธารณะที่ไม่โดนบล็อกแน่นอน
             fetch('https://api.ipify.org?format=json')
             .then(res => res.json())
             .then(data => {
@@ -328,15 +315,13 @@
                 document.getElementById('log-ip').innerText = data.ip;
             })
             .catch(() => {
-                document.getElementById('user-ip').innerText = "127.0.0.1 (LOCAL)";
-                document.getElementById('log-ip').innerText = "ดักจับผ่านสากลล้มเหลว";
+                document.getElementById('user-ip').innerText = "127.0.0.1";
+                document.getElementById('log-ip').innerText = "127.0.0.1";
             });
 
-            // 2. ดักจับเวลาปัจจุบันของเครื่องคนดู
             const now = new Date();
             document.getElementById('log-time').innerText = now.toLocaleString('th-TH');
 
-            // 3. ตรวจสอบระบบปฏิบัติการของคนที่เข้ามาดู
             let os = "ไม่สามารถระบุได้";
             if (navigator.userAgent.indexOf("Win") != -1) os = "Windows OS";
             if (navigator.userAgent.indexOf("Mac") != -1) os = "Macintosh (macOS)";
@@ -345,68 +330,20 @@
             if (navigator.userAgent.indexOf("like Mac") != -1) os = "iOS (iPhone/iPad)";
             document.getElementById('log-os').innerText = os;
 
-            // 4. ระบบนับยอดวิวจริงขยับได้ในเซสชั่น
-            let currentViews = localStorage.getItem('pydam_views');
+            // เริ่มนับยอดวิวจริงจาก 0
+            let currentViews = localStorage.getItem('clean_views');
             if (!currentViews) {
-                currentViews = 6767;
+                currentViews = 0; // เริ่มที่ 0
             } else {
                 currentViews = parseInt(currentViews) + 1;
             }
-            localStorage.setItem('pydam_views', currentViews);
+            localStorage.setItem('clean_views', currentViews);
             document.getElementById('views').innerText = currentViews;
         }
 
         window.onload = function() {
             typeWriter();
             initHackerTracker();
-        };
-    </script>
-</body>
-</html>
-           // 3. ยิงข้อมูล IP + เวลา ขึ้นไปเซฟบน Database กลางให้คนอื่นเห็น
-                fetch(DB_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ ip: userIP, time: timeString })
-                })
-                .then(() => {
-                    // 4. หลังจากส่งเสร็จ ให้ไปดึงประวัติของทุกคนลงมาโชว์ในตาราง
-                    loadAllUserLogs();
-                });
-            })
-            .catch(() => {
-                document.getElementById('user-ip').innerText = "UNKNOWN";
-                loadAllUserLogs();
-            });
-        }
-
-        // ฟังก์ชันดึงประวัติของทุกคนจากฐานข้อมูลมาโชว์บนหน้าเว็บ
-        function loadAllUserLogs() {
-            fetch(DB_URL)
-            .then(res => res.json())
-            .then(data => {
-                if(!data) return;
-                
-                // แปลงข้อมูลที่ได้ให้กลายเป็นอาร์เรย์แล้วเรียงจากใหม่สุดไปเก่าสุด
-                const logArray = Object.values(data).reverse();
-                let tableHtml = "";
-                
-                // นำข้อมูล 6 คนล่าสุดมาแสดงผล
-                const limit = logArray.length > 6 ? 6 : logArray.length;
-                for(let i = 0; i < limit; i++) {
-                    tableHtml += `<tr><td>${logArray[i].ip}</td><td>${logArray[i].time}</td></tr>`;
-                }
-                
-                document.getElementById('log-data').innerHTML = tableHtml;
-                
-                // เอายอดวิวจริงทั้งหมดที่นับรวมจากจำนวนประวัติในฐานข้อมูลมาแสดงผลแทนเลขหลอก
-                document.getElementById('views').innerText = 0 + logArray.length;
-            });
-        }
-
-        // สั่งทำงานทั้งหมดตอนโหลดหน้าเว็บ
-        window.onload = function() {
-            typeWriter();
-            runHackerSystem();
         };
     </script>
 </body>
