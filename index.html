@@ -3,87 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พี่ดำสุดหล่อ - Dino Adventure</title>
+    <title>พี่ดำสุดหล่อ - Space Mission Control</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* (เอา CSS เดิมของมึงวางไว้ตรงนี้ได้เลยสัส) */
-        body { background-color: #020208; color: #00FF66; margin: 0; font-family: 'Courier New', monospace; }
-        #space-canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; }
-        .main-wrapper { position: relative; z-index: 10; padding-top: 100px; display: flex; flex-direction: column; align-items: center; }
-        #gameCanvas { border: 2px solid #00FF66; background: #050505; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+        body { background-color: #020208; color: #00FF66; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+        #space-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .navbar { position: fixed; top: 0; width: 100%; background: rgba(5, 5, 15, 0.95); border-bottom: 2px solid #00FF66; padding: 15px 20px; display: flex; justify-content: space-between; z-index: 9999; }
+        .main-wrapper { z-index: 10; padding: 100px 20px; text-align: center; }
+        #gameCanvas { border: 2px solid #00FF66; background: #050505; margin-top: 20px; }
         .page-content { display: none; }
         .active-page { display: block; }
     </style>
 </head>
 <body>
-
     <canvas id="space-canvas"></canvas>
-
-    <nav class="navbar">...</nav>
-    <div class="sidebar" id="sidebarMenu">...</div>
+    <nav class="navbar"><div class="nav-logo">พี่ดำสุดหล่อ Terminal</div></nav>
 
     <div class="main-wrapper">
-        <div id="profilePage" class="page-content active-page">...</div>
-        <div id="loginPage" class="page-content">...</div>
-        
-        <div id="gamePage" class="page-content">
+        <div id="gamePage" class="page-content active-page">
             <h2>SPACE DINO GAME</h2>
             <canvas id="gameCanvas" width="400" height="180"></canvas>
-            <div>SCORE: <span id="currentScore">0</span></div>
+            <div style="margin-top:10px;">SCORE: <span id="currentScore">0</span></div>
         </div>
     </div>
 
     <script>
-        // --- ส่วนของระบบเว็บ (เอฟเฟกต์ดาว, Sidebar) เอาของเก่ามึงใส่ไว้ตรงนี้ ---
+        // --- 1. ระบบฉากหลังดาวไหล ---
+        const sCanvas = document.getElementById("space-canvas");
+        const sCtx = sCanvas.getContext("2d");
+        sCanvas.width = window.innerWidth; sCanvas.height = window.innerHeight;
+        let stars = Array.from({length: 50}, () => ({x: Math.random()*sCanvas.width, y: Math.random()*sCanvas.height, speed: Math.random()*0.5}));
+        function animateSpace() {
+            sCtx.clearRect(0,0, sCanvas.width, sCanvas.height);
+            sCtx.fillStyle = "#00FF66";
+            stars.forEach(s => { sCtx.fillRect(s.x, s.y, 2, 2); s.y += s.speed; if(s.y > sCanvas.height) s.y=0; });
+            requestAnimationFrame(animateSpace);
+        }
+        animateSpace();
 
-        // --- ระบบเกม Dino (ตัวใหม่ที่รวมรูปและเสียงจอย) ---
+        // --- 2. ระบบเกม Dino ที่มึงต้องการ ---
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         
-        // รูปมึง
+        // รูปมึง (ตรวจสอบชื่อไฟล์ให้ตรงเป๊ะใน GitHub สัส!)
         const dinoImg = new Image(); dinoImg.src = '07621f8b5d3ee28f4ae269ca95f20c0e.jpg';
         const cactusImg = new Image(); cactusImg.src = 'images (21).jpeg';
 
-        let isPlaying = false, score = 0;
+        let isPlaying = true, score = 0;
         let dino = { x: 30, y: 120, w: 40, h: 40, vy: 0, gravity: 0.8, jump: -12, grounded: false };
         let obstacles = [], spawnTimer = 0, speed = 5;
 
         function playJumpSound() {
-            const joySound = new Audio('joy.mp3'); // ชื่อไฟล์เสียงต้องเป็น joy.mp3 นะสัส!
+            const joySound = new Audio('joy.mp3'); 
             joySound.play().catch(e => console.log("รอจิ้มจอ"));
         }
 
-        function initGame() {
-            isPlaying = true; score = 0; obstacles = [];
-            requestAnimationFrame(gameLoop);
-        }
+        canvas.onclick = () => { if(dino.grounded) { dino.vy = dino.jump; dino.grounded = false; playJumpSound(); } };
 
         function gameLoop() {
             if(!isPlaying) return;
-            ctx.fillStyle = "#050505"; ctx.fillRect(0,0, canvas.width, canvas.height);
+            speed = 5 + (score/10);
+            ctx.clearRect(0,0, canvas.width, canvas.height);
             
-            // ไดโนเสาร์
+            // วาดรูปไดโนเสาร์
             dino.vy += dino.gravity; dino.y += dino.vy;
             if(dino.y > 120) { dino.y = 120; dino.vy = 0; dino.grounded = true; }
             ctx.drawImage(dinoImg, dino.x, dino.y, dino.w, dino.h);
 
-            // กระบองเพชร
+            // วาดรูปกระบองเพชร
             spawnTimer++;
             if(spawnTimer > 60) { obstacles.push({x: 400, y: 120, w: 40, h: 50}); spawnTimer = 0; }
             
             for(let i=obstacles.length-1; i>=0; i--) {
                 let o = obstacles[i]; o.x -= speed;
                 ctx.drawImage(cactusImg, o.x, o.y, o.w, o.h);
-                if(dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y < o.y + o.h && dino.y + dino.h > o.y) { isPlaying = false; alert("ตายห่า!"); location.reload(); }
+                if(dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y < o.y + o.h && dino.y + dino.h > o.y) { 
+                    isPlaying = false; alert("ตายห่า! คะแนน: " + score); location.reload(); 
+                }
                 if(o.x < -50) { obstacles.splice(i,1); score++; document.getElementById("currentScore").innerText = score; }
             }
             requestAnimationFrame(gameLoop);
         }
-
-        // เชื่อมปุ่มกระโดด
-        canvas.onclick = () => { 
-            if(dino.grounded) { dino.vy = dino.jump; dino.grounded = false; playJumpSound(); } 
-        };
+        gameLoop();
     </script>
 </body>
 </html>
