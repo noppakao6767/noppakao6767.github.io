@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พี่ดำสุดหล่อ - Game Space Center</title>
+    <title>พี่ดำสุดหล่อ - Space Mission Control</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace, 'Segoe UI', Tahoma;
         }
 
         body {
-            background-color: #0d0a1a;
-            color: #ffffff;
+            background-color: #020208;
+            color: #00FF66; /* เปลี่ยนฟอนต์หลักเป็นสีเขียวเหมือนหน้าจอคอมพิวเตอร์อวกาศ */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -24,7 +24,7 @@
             position: relative;
         }
 
-        /* เอฟเฟกต์ฉากหลังดวงดาวอวกาศ */
+        /* เอฟเฟกต์ฉากหลังดวงดาวอวกาศไหล */
         #space-canvas {
             position: fixed;
             top: 0;
@@ -35,46 +35,59 @@
             pointer-events: none;
         }
 
-        /* เมนูบาร์ด้านบน */
+        /* เมนูบาร์ด้านบน สไตล์โปร่งแสงยานอวกาศ */
         .navbar {
             width: 100%;
-            background: #4a148c;
+            background: rgba(15, 10, 30, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid #00FF66;
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: relative;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 9999; /* ดันขึ้นมาสูงสุดไม่ให้โดนอะไรทับ */
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
         }
 
         .nav-logo {
             font-size: 20px;
             font-weight: bold;
-            color: #fff;
+            color: #00FF66;
             display: flex;
             align-items: center;
             gap: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
         }
 
+        /* ปุ่ม 3 ขีด แก้ไขสไตล์และการกดให้จิ้มง่าย */
         .nav-menu-btn {
-            background: #7b1fa2;
-            color: white;
-            border: none;
-            padding: 8px 16px;
+            background: rgba(0, 255, 102, 0.1);
+            color: #00FF66;
+            border: 1px solid #00FF66;
+            padding: 10px 18px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
         }
-        .nav-menu-btn:hover { background: #9c27b0; }
+        .nav-menu-btn:hover { 
+            background: #00FF66; 
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+        }
 
         /* แถบเมนูด้านข้าง (3 ขีด) */
         .sidebar-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 998;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000; /* ดัน overlay ให้อยู่เหนือ navbar ตอนเปิด */
             display: none;
         }
 
@@ -82,28 +95,32 @@
             position: fixed;
             top: 0; right: -300px;
             width: 300px; height: 100%;
-            background: #120b24;
-            border-left: 3px solid #7b1fa2;
-            z-index: 999;
+            background: rgba(5, 5, 15, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 2px solid #00FF66;
+            z-index: 10001; /* อยู่เหนือ overlay */
             transition: 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-            padding: 70px 20px 20px 20px;
+            padding: 80px 20px 20px 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            box-shadow: -10px 0 30px rgba(0, 255, 102, 0.2);
         }
         .sidebar.active { right: 0; }
         
         .close-sidebar {
             position: absolute;
             top: 20px; left: 20px;
-            color: #ff5252; font-size: 24px; cursor: pointer;
+            color: #ff3333; font-size: 26px; cursor: pointer;
             user-select: none;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
         }
 
         .sidebar-link {
-            background: #1e1238;
-            color: white;
-            border: 1px solid #4a148c;
+            background: rgba(255, 255, 255, 0.03);
+            color: #00FF66;
+            border: 1px solid rgba(0, 255, 102, 0.3);
             padding: 14px;
             border-radius: 10px;
             text-align: left;
@@ -116,7 +133,11 @@
             gap: 10px;
             width: 100%;
         }
-        .sidebar-link:hover { background: #7b1fa2; color: #fff; }
+        .sidebar-link:hover { 
+            background: rgba(0, 255, 102, 0.15); 
+            border-color: #00FF66;
+            text-shadow: 0 0 5px #00FF66;
+        }
 
         /* ส่วนเนื้อหาหลัก */
         .main-wrapper {
@@ -131,24 +152,26 @@
             justify-content: center;
         }
 
-        /* การ์ดโปรไฟล์หลัก หน้าแรก (คลีน ๆ ลบปุ่มเฟส/ไอจีออกแล้ว) */
+        /* การ์ดโปรไฟล์หลัก หน้าแรก ธีมพิมพ์ในอวกาศแบบกระจกใส */
         .profile-card {
-            background: rgba(20, 15, 38, 0.9);
-            border: 2px solid #7b1fa2;
+            background: rgba(10, 10, 25, 0.65);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid #00FF66;
             border-radius: 24px;
             padding: 45px 25px;
             text-align: center;
-            box-shadow: 0 0 25px rgba(123, 31, 162, 0.4);
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
         }
 
         .profile-avatar {
             width: 145px;
             height: 145px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #7028ff, #00f2fe);
+            background: linear-gradient(135deg, #00FF66, #00bcff);
             margin: 0 auto 25px auto;
-            border: 3px solid #7b1fa2;
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+            border: 2px solid #00FF66;
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.6);
         }
 
         .profile-title {
@@ -156,54 +179,62 @@
             font-weight: bold;
             color: #00FF66;
             margin-bottom: 8px;
-            text-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+            text-shadow: 0 0 15px rgba(0, 255, 102, 0.7);
+            letter-spacing: 1px;
         }
 
         .profile-subtitle {
-            font-size: 15px;
-            color: #a19db8;
-            letter-spacing: 2px;
+            font-size: 14px;
+            color: #88c999;
+            letter-spacing: 3px;
             margin-bottom: 10px;
         }
 
-        /* --- โซนหน้าลงชื่อเข้าใช้ (Login Page) --- */
+        /* --- โซนหน้าลงชื่อเข้าใช้ (Login Space Terminal) --- */
         .login-page-container {
             display: none;
-            background: #1a1235;
-            border: 2px solid #7b1fa2;
+            background: rgba(5, 5, 20, 0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid #00FF66;
             border-radius: 20px;
-            padding: 30px 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            padding: 35px 25px;
+            box-shadow: 0 0 35px rgba(0, 255, 102, 0.3);
             text-align: center;
         }
 
         .login-page-container h2 {
-            color: #fff;
+            color: #00FF66;
             font-size: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+            letter-spacing: 1px;
         }
 
         .input-box {
             position: relative;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             text-align: left;
         }
 
         .input-box input {
             width: 100%;
             padding: 14px 45px 14px 14px;
-            background: #0d0a1a;
-            border: 1px solid #4a148c;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00FF66;
             border-radius: 10px;
-            color: #fff;
+            color: #00FF66;
             font-size: 16px;
             transition: 0.3s;
         }
         .input-box input:focus {
-            border-color: #00FF66;
             outline: none;
-            box-shadow: 0 0 10px rgba(0,255,102,0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .input-box input::placeholder {
+            color: rgba(0, 255, 102, 0.4);
         }
 
         .eye-icon {
@@ -212,47 +243,54 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #a19db8;
+            color: rgba(0, 255, 102, 0.6);
             font-size: 18px;
         }
-        .eye-icon:hover { color: #00FF66; }
+        .eye-icon:hover { color: #00FF66; text-shadow: 0 0 5px #00FF66; }
 
         .submit-login-btn {
             width: 100%;
-            background: #7b1fa2;
-            color: #fff;
-            border: none;
+            background: rgba(0, 255, 102, 0.15);
+            color: #00FF66;
+            border: 2px solid #00FF66;
             padding: 14px;
             border-radius: 10px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 4px 12px rgba(123,31,162,0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+            letter-spacing: 1px;
         }
-        .submit-login-btn:hover { background: #9c27b0; transform: translateY(-2px); }
+        .submit-login-btn:hover { 
+            background: #00FF66; 
+            color: #000; 
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.6);
+        }
 
         .back-home-btn {
             display: inline-block;
-            margin-top: 15px;
-            color: #a19db8;
+            margin-top: 20px;
+            color: rgba(0, 255, 102, 0.6);
             font-size: 14px;
             cursor: pointer;
             text-decoration: underline;
         }
-        .back-home-btn:hover { color: #fff; }
+        .back-home-btn:hover { color: #00FF66; }
 
         /* --- โซนหน้าต่างเล่นเกม --- */
         .game-page-container {
             display: none;
-            background: #111;
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #00FF66;
             border-radius: 20px;
             padding: 20px;
             text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.4);
         }
         #gameCanvas {
-            background: #161616;
+            background: #050510;
             border-radius: 10px;
             display: block;
             margin: 15px auto;
@@ -260,15 +298,18 @@
             max-width: 100%;
         }
 
-        /* --- ฟุตเตอร์ส่วนท้าย Help & Contact --- */
+        /* --- ฟุตเตอร์ส่วนท้ายสไตล์กระจกอวกาศโปร่งแสง --- */
         .footer-section {
             width: 100%;
-            background: #231245;
-            border-top: 4px solid #4a148c;
+            background: rgba(10, 10, 25, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 2px solid #00FF66;
             padding: 40px 20px;
             position: relative;
             z-index: 10;
             margin-top: auto;
+            box-shadow: 0 -5px 20px rgba(0, 255, 102, 0.15);
         }
 
         .footer-container {
@@ -281,13 +322,14 @@
         }
 
         .footer-box h3 {
-            color: #fff;
+            color: #00FF66;
             font-size: 18px;
             margin-bottom: 15px;
             position: relative;
             padding-bottom: 8px;
-            border-bottom: 2px solid #7b1fa2;
+            border-bottom: 2px solid rgba(0, 255, 102, 0.4);
             display: inline-block;
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
         }
 
         .footer-links {
@@ -297,30 +339,31 @@
         .footer-links li {
             margin-bottom: 10px;
             font-size: 14px;
-            color: #c3bfdb;
+            color: #88c999;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .footer-links li a {
-            color: #c3bfdb;
+            color: #88c999;
             text-decoration: none;
             transition: 0.2s;
         }
-        .footer-links li a:hover { color: #00FF66; padding-left: 5px; }
+        .footer-links li a:hover { color: #00FF66; padding-left: 5px; text-shadow: 0 0 5px #00FF66; }
 
-        /* กล่องแฟนเพจย่อรูปเฟสแว่นดำตามสั่ง */
+        /* แฟนเพจเวอร์ชันย่อรูปโปรไฟล์อวตารแว่นดำ */
         .fake-fb-page {
-            background: #fff;
-            color: #333;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(0, 255, 102, 0.3);
             border-radius: 8px;
             padding: 15px;
             margin-top: 10px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .fb-header {
@@ -329,32 +372,216 @@
             gap: 10px;
         }
 
-        /* ดึงองค์ประกอบโครงสร้างอวตารผู้ชายใส่แว่นดำจากรูปที่ 3 มาวาดด้วย CSS */
+        /* ดึงอวตารแว่นดำมาสร้างคอมโพเนนต์ */
         .fb-logo-avatar {
             width: 42px; height: 42px;
-            background-color: #3b5998;
+            background-color: #1d1b3a;
             border-radius: 50%;
             position: relative;
             overflow: hidden;
-            border: 2px solid #fff;
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            border: 2px solid #00FF66;
             display: flex;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 0 8px #00FF66;
         }
-        /* วาดทรงผมสีดำ */
         .fb-logo-avatar::before {
             content: "";
             position: absolute;
             top: 0; width: 100%; height: 50%;
-            background: #1a1a1a;
+            background: #000;
             border-radius: 50% 50% 0 0;
         }
-        /* วาดใบหน้าขาวนวลและแว่นตาสีดำ */
         .fb-logo-avatar::after {
             content: "🕶️";
             font-size: 14px;
             position: absolute;
+            top: 10px;
+            z-index: 2;
+        }
+
+        .fb-follow-btn {
+            background: rgba(0, 255, 102, 0.1);
+            color: #00FF66;
+            border: 1px solid #00FF66;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 5px;
+            align-self: flex-start;
+            transition: 0.2s;
+        }
+        .fb-follow-btn:hover {
+            background: #00FF66;
+            color: #000;
+        }
+
+        /* ตรารับรองท้ายเว็บอวกาศ */
+        .security-badges {
+            width: 100%;
+            max-width: 1100px;
+            margin: 30px auto 0 auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 255, 102, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .badge-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #88c999;
+            font-size: 14px;
+        }
+
+        .badge-box {
+            background: rgba(0, 255, 102, 0.05);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid rgba(0, 255, 102, 0.4);
+            color: #00FF66;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="space-canvas"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-logo">
+            <i class="fa-solid fa-satellite-dish" style="color: #00FF66;"></i> พี่ดำสุดหล่อ Terminal
+        </div>
+        <button class="nav-menu-btn" id="openSidebarBtn">
+            <i class="fa-solid fa-bars"></i> เมนู
+        </button>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebarMenu">
+        <span class="close-sidebar" id="closeSidebarBtn">❌</span>
+        <button class="sidebar-link" id="menuHomeBtn"><i class="fa-solid fa-terminal"></i> หน้าแรกโปรไฟล์</button>
+        <button class="sidebar-link" id="menuLoginBtn"><i class="fa-solid fa-key"></i> เข้าสู่ระบบเล่นเกม</button>
+    </div>
+
+    <div class="main-wrapper">
+        
+        <div id="profilePage">
+            <div class="profile-card">
+                <div class="profile-avatar"></div>
+                <div class="profile-title">พี่ดำสุดหล่อ</div>
+                <div class="profile-subtitle">SYSTEM ACTIVE //</div>
+                <div style="color: rgba(0, 255, 102, 0.5); font-size: 14px; font-family: monospace;">NODE_ID: 6767</div>
+            </div>
+        </div>
+
+        <div id="loginPage" class="login-page-container">
+            <h2><i class="fa-solid fa-terminal"></i> USER_AUTHENTICATION</h2>
+            
+            <div class="input-box">
+                <input type="text" id="usernameInput" placeholder="ENTER USERNAME OR ID...">
+            </div>
+
+            <div class="input-box">
+                <input type="password" id="passwordInput" placeholder="ENTER ACCESS PASSWORD...">
+                <i class="fa-solid fa-eye eye-icon" id="passwordEyeToggle"></i>
+            </div>
+
+            <button class="submit-login-btn" id="confirmLoginBtn">EXECUTE LOGIN</button>
+            <div class="back-home-btn" id="backToHomeTrigger">← ABORT_MISSION (กลับหน้าหลัก)</div>
+        </div>
+
+        <div id="gamePage" class="game-page-container">
+            <h2 style="color: #00FF66;"><i class="fa-solid fa-user-astronaut"></i> SPACE DINO GAME</h2>
+            <p style="color: #88c999; font-size: 13px; margin-top:5px;">กดปุ่ม Spacebar หรือจิ้มหน้าจอเพื่อกระโดดข้ามสิ่งกีดขวาง</p>
+            <canvas id="gameCanvas" width="440" height="180"></canvas>
+            <div style="color: #00FF66; font-weight: bold; margin-bottom: 10px;">
+                SCORE: <span id="currentScore">0</span> | HIGH_SCORE: <span id="maxScore">0</span>
+            </div>
+            <button class="submit-login-btn" id="logOutBtn" style="background: rgba(255, 51, 51, 0.1); border-color: #ff3333; color: #ff3333;"><i class="fa-solid fa-power-off"></i> DISCONNECT GAME</button>
+        </div>
+
+    </div>
+
+    <footer class="footer-section">
+        <div class="footer-container">
+            
+            <div class="footer-box">
+                <h3>Help ? (ช่วยเหลือ)</h3>
+                <ul class="footer-links">
+                    <li><i class="fa-solid fa-code" style="color:#00FF66;"></i><a href="#">เกี่ยวกับเกมและแมพ Roblox ของเรา</a></li>
+                    <li><i class="fa-solid fa-code" style="color:#00FF66;"></i><a href="#">วิธีแก้ปัญหาเข้าแมพแล้วหลุด บั๊กค้าง</a></li>
+                    <li><i class="fa-solid fa-code" style="color:#00FF66;"></i><a href="#">ไกด์สอนเล่นพื้นฐานสำหรับมือใหม่</a></li>
+                    <li><i class="fa-solid fa-code" style="color:#00FF66;"></i><a href="#">กฎระเบียบของเซิร์ฟเวอร์/แมพเกม</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-box">
+                <h3>Contact (ติดต่อเรา)</h3>
+                <ul class="footer-links">
+                    <li><i class="fa-solid fa-phone" style="color:#00FF66;"></i> 6767676767</li>
+                    <li><i class="fa-solid fa-envelope" style="color:#00FF66;"></i> kuyyesmam1@gmail.com</li>
+                    <li><i class="fa-solid fa-clock" style="color:#00FF66;"></i> MONITORING SYSTEM: 24 HR</li>
+                </ul>
+            </div>
+
+            <div class="footer-box">
+                <h3>Follow Us On Social</h3>
+                <div style="display:flex; gap:15px; margin-bottom:10px; font-size:20px;">
+                    <a href="https://facebook.com" target="_blank" style="color:#00FF66;"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" style="color:#00FF66;"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="https://instagram.com" target="_blank" style="color:#00FF66;"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+                <div class="fake-fb-page">
+                    <div class="fb-header">
+                        <div class="fb-logo-avatar"></div>
+                        <div>
+                            <div style="font-weight:bold; font-size:14px; color:#00FF66;">JO TO</div>
+                            <div style="font-size:12px; color:#88c999;">264 เพื่อนบนระบบ</div>
+                        </div>
+                    </div>
+                    <button class="fb-follow-btn"><i class="fa-brands fa-facebook"></i> เพิ่มเพื่อนในเฟส</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="security-badges">
+            <div class="badge-group">
+                <i class="fa-solid fa-user-shield" style="color:#00FF66; font-size:20px;"></i>
+                <span>Google Safe Browsing Verified</span>
+            </div>
+            <div class="badge-group">
+                <div class="badge-box">SECURE CLOUD ENGINE</div>
+                <div class="badge-box">HTTPS:// SECURE PROTOCOL</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- ระบบดาวอวกาศไหลพื้นหลัง ---
+        const spaceCanvas = document.getElementById("space-canvas");
+        const sCtx = spaceCanvas.getContext("2d");
+        let stars = [];
+
+        function resizeCanvas() { spaceCanvas.width = window.innerWidth; spaceCanvas.height = window.innerHeight; }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        for(let i=0; i<70; i++) {
+            stars.push({ x: Math.random() * spaceCanvas.width, y: Math.random() * spaceCanvas.height, size: Math.random() * 2 + 0.5, speed: Math.random() * 0.3 + 0.1 });
+        }
+
+        function animateSpace() {
+            sCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.heigh       position: absolute;
             top: 10px;
             z-index: 2;
         }
