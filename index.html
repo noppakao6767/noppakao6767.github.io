@@ -3,80 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พี่ดำสุดหล่อ - Space Mission Control</title>
-    <link rel="icon" type="image/webp" href="IMG_20250815_141336_905.webp">
+    <title>พี่ดำสุดหล่อ - Dino Adventure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        body { background-color: #020208; color: #00FF66; margin: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: 'Courier New', Courier, monospace; }
+        /* (เอา CSS เดิมของมึงวางไว้ตรงนี้ได้เลยสัส) */
+        body { background-color: #020208; color: #00FF66; margin: 0; font-family: 'Courier New', monospace; }
+        #space-canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; }
+        .main-wrapper { position: relative; z-index: 10; padding-top: 100px; display: flex; flex-direction: column; align-items: center; }
         #gameCanvas { border: 2px solid #00FF66; background: #050505; cursor: pointer; }
+        .page-content { display: none; }
+        .active-page { display: block; }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="180"></canvas>
-    <div style="margin-top: 10px;">SCORE: <span id="currentScore">0</span></div>
+
+    <canvas id="space-canvas"></canvas>
+
+    <nav class="navbar">...</nav>
+    <div class="sidebar" id="sidebarMenu">...</div>
+
+    <div class="main-wrapper">
+        <div id="profilePage" class="page-content active-page">...</div>
+        <div id="loginPage" class="page-content">...</div>
+        
+        <div id="gamePage" class="page-content">
+            <h2>SPACE DINO GAME</h2>
+            <canvas id="gameCanvas" width="400" height="180"></canvas>
+            <div>SCORE: <span id="currentScore">0</span></div>
+        </div>
+    </div>
 
     <script>
+        // --- ส่วนของระบบเว็บ (เอฟเฟกต์ดาว, Sidebar) เอาของเก่ามึงใส่ไว้ตรงนี้ ---
+
+        // --- ระบบเกม Dino (ตัวใหม่ที่รวมรูปและเสียงจอย) ---
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        let isPlaying = true, score = 0, stage = 0;
-        let dino = { x: 30, y: 125, w: 25, h: 35, vy: 0, gravity: 0.8, jump: -12, grounded: false };
-        let obstacles = [], particles = [], spawnTimer = 0, speed = 5;
+        
+        // รูปมึง
+        const dinoImg = new Image(); dinoImg.src = '07621f8b5d3ee28f4ae269ca95f20c0e.jpg';
+        const cactusImg = new Image(); cactusImg.src = 'images (21).jpeg';
 
-        // ฟังก์ชันเล่นเสียงจอย
+        let isPlaying = false, score = 0;
+        let dino = { x: 30, y: 120, w: 40, h: 40, vy: 0, gravity: 0.8, jump: -12, grounded: false };
+        let obstacles = [], spawnTimer = 0, speed = 5;
+
         function playJumpSound() {
-            const joySound = new Audio('joy.mp3'); 
-            joySound.play();
+            const joySound = new Audio('joy.mp3'); // ชื่อไฟล์เสียงต้องเป็น joy.mp3 นะสัส!
+            joySound.play().catch(e => console.log("รอจิ้มจอ"));
         }
 
-        function doJump() { 
-            if(dino.grounded && isPlaying) { 
-                dino.vy = dino.jump; 
-                dino.grounded = false; 
-                playJumpSound(); 
-            } 
-        }
-        canvas.onclick = doJump;
-
-        function updateEffects() {
-            if (stage === 0 && Math.random() < 0.2) particles.push({ x: Math.random()*canvas.width, y: 180, vx: 0, vy: -Math.random()*3-1, life: 30, color: "#FF4500" });
-            if (stage === 1 && Math.random() < 0.5) particles.push({ x: Math.random()*canvas.width, y: 0, vx: 1, vy: 5, life: 40, color: "#AAAAFF" });
-            if (stage === 2 && Math.random() < 0.3) particles.push({ x: Math.random()*canvas.width, y: Math.random()*180, vx: 0, vy: 0, life: 60, color: "#FFFFFF" });
+        function initGame() {
+            isPlaying = true; score = 0; obstacles = [];
+            requestAnimationFrame(gameLoop);
         }
 
         function gameLoop() {
             if(!isPlaying) return;
-            if(score > 20) stage = 1;
-            if(score > 50) stage = 2;
-            speed = 5 + (score/10);
-
-            ctx.fillStyle = (stage === 0) ? "#330000" : (stage === 1 ? "#001a33" : "#e6f7ff");
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-
-            updateEffects();
-
+            ctx.fillStyle = "#050505"; ctx.fillRect(0,0, canvas.width, canvas.height);
+            
+            // ไดโนเสาร์
             dino.vy += dino.gravity; dino.y += dino.vy;
-            if(dino.y > 125) { dino.y = 125; dino.vy = 0; dino.grounded = true; }
-            ctx.fillStyle = (stage === 0) ? "#FF4500" : (stage === 2 ? "#00AAFF" : "#00FF66");
-            ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+            if(dino.y > 120) { dino.y = 120; dino.vy = 0; dino.grounded = true; }
+            ctx.drawImage(dinoImg, dino.x, dino.y, dino.w, dino.h);
 
+            // กระบองเพชร
             spawnTimer++;
-            if(spawnTimer > Math.max(30, 80-speed)) { obstacles.push({ x: canvas.width, y: 130, w: 20, h: 30 }); spawnTimer = 0; }
+            if(spawnTimer > 60) { obstacles.push({x: 400, y: 120, w: 40, h: 50}); spawnTimer = 0; }
             
             for(let i=obstacles.length-1; i>=0; i--) {
                 let o = obstacles[i]; o.x -= speed;
-                ctx.fillStyle = "#FF3333"; ctx.fillRect(o.x, o.y, o.w, o.h);
-                if(dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y < o.y + o.h && dino.y + dino.h > o.y) { isPlaying = false; alert("ตายห่า! คะแนน: " + score); location.reload(); }
-                if(o.x + o.w < 0) { obstacles.splice(i, 1); score++; document.getElementById("currentScore").innerText = score; }
+                ctx.drawImage(cactusImg, o.x, o.y, o.w, o.h);
+                if(dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y < o.y + o.h && dino.y + dino.h > o.y) { isPlaying = false; alert("ตายห่า!"); location.reload(); }
+                if(o.x < -50) { obstacles.splice(i,1); score++; document.getElementById("currentScore").innerText = score; }
             }
-
-            particles.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy; p.life--;
-                ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
-                if(p.life <= 0) particles.splice(i, 1);
-            });
-
             requestAnimationFrame(gameLoop);
         }
-        gameLoop();
+
+        // เชื่อมปุ่มกระโดด
+        canvas.onclick = () => { 
+            if(dino.grounded) { dino.vy = dino.jump; dino.grounded = false; playJumpSound(); } 
+        };
     </script>
 </body>
 </html>
