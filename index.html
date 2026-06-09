@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พี่ดำสุดหล่อ - Space Dynamic Profile & Game</title>
+    <title>พี่ดำสุดหล่อ - Space Profile & Game</title>
     <style>
         /* รีเซ็ตค่าพื้นฐาน */
         * {
@@ -25,14 +25,14 @@
             position: relative;
         }
 
-        /* Canvas สำหรับเอฟเฟกต์ดวงดาวอวกาศสมจริง */
+        /* แก้อันนี้เลย! ดันดาวไปอยู่หลังสุดด้วย z-index: -1 ไม่ให้บังการ์ด */
         #space-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            z-index: -1; 
             pointer-events: none;
         }
 
@@ -43,9 +43,9 @@
             right: 25px;
             width: 45px;
             height: 45px;
-            background: rgba(17, 17, 17, 0.85);
+            background: #111111;
             border: 2px solid #00FF66;
-            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
             border-radius: 10px;
             display: flex;
             flex-direction: column;
@@ -53,11 +53,11 @@
             align-items: center;
             gap: 6px;
             cursor: pointer;
-            z-index: 1000;
+            z-index: 1000; /* ลอยอยู่ข้างบนสุดเสมอ */
             transition: 0.3s;
         }
         .menu-toggle:hover {
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
             transform: scale(1.05);
         }
         .menu-toggle span {
@@ -65,10 +65,9 @@
             height: 3px;
             background-color: #00FF66;
             border-radius: 2px;
-            transition: 0.3s;
         }
 
-        /* แถบเมนูด้านข้างที่จะสไลด์ออกมา */
+        /* แถบเมนูด้านข้าง */
         .sidebar {
             position: fixed;
             top: 0;
@@ -100,9 +99,6 @@
             cursor: pointer;
             text-align: left;
             transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .sidebar-btn:hover {
             border-color: #00FF66;
@@ -111,9 +107,9 @@
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
         }
 
-        /* --- การ์ดโปรไฟล์หลัก --- */
+        /* --- การ์ดโปรไฟล์หลัก ลอยขึ้นมาเหนือดวงดาวด้วย z-index: 10 --- */
         .main-card {
-            background: rgba(17, 17, 17, 0.8);
+            background: rgba(17, 17, 17, 0.9);
             backdrop-filter: blur(12px);
             border: 2px solid #00FF66;
             box-shadow: 0 0 25px rgba(0, 255, 102, 0.4);
@@ -123,10 +119,10 @@
             max-width: 380px;
             text-align: center;
             position: relative;
-            z-index: 10;
+            z-index: 10; 
         }
 
-        /* รูปโปรไฟล์แบบไล่เฉดสีเดิมอัพเกรดความเรืองแสง */
+        /* รูปโปรไฟล์แบบไล่เฉดสีม่วง-ฟ้า ขอบนีออนเขียวตามของเดิม */
         .profile-img {
             width: 150px;
             height: 150px;
@@ -182,7 +178,6 @@
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
         }
 
-        /* เส้นแบ่ง */
         .separator-line {
             border-top: 1px dashed rgba(0, 255, 102, 0.3);
             margin: 30px 0 20px 0;
@@ -242,8 +237,139 @@
             padding: 12px;
             margin: 10px 0;
             background: #1a1a1a;
-            border: 1px solid #3
-            
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+        }
+        .login-input:focus { border-color: #00FF66; outline: none; }
+        
+        .btn-submit {
+            background: #00FF66;
+            color: #000;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(0,255,102,0.4);
+        }
+        .btn-submit:hover { background: #00cc55; box-shadow: 0 0 15px rgba(0,255,102,0.7); }
+
+        #game-container {
+            display: none;
+            width: 100%;
+            max-width: 550px;
+            background: #111;
+            border: 2px solid #00FF66;
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+        }
+        #gameCanvas {
+            background: #161616;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            border-bottom: 3px solid #00FF66;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="space-canvas"></canvas>
+
+    <div class="menu-toggle" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="sidebar" id="sidebarMenu">
+        <button class="sidebar-btn" onclick="openModal('loginModal')">🔒 เข้าสู่ระบบ / ลงชื่อเข้าใช้</button>
+        <button class="sidebar-btn" onclick="openModal('contactModal')">📞 ข้อมูลติดต่อ</button>
+    </div>
+
+    <div class="main-card">
+        <div class="profile-img"></div>
+        <div class="profile-name">พี่ดำสุดหล่อ</div>
+        <div class="status-connecting">CONNECTING...</div>
+        <div class="profile-id">ID: 6767</div>
+
+        <a href="https://facebook.com" target="_blank" class="btn-link">Facebook</a>
+        <a href="https://instagram.com" target="_blank" class="btn-link">Instagram</a>
+
+        <div class="separator-line"></div>
+        <div class="view-counter">ยอดการดูเว็บทั้งหมด: <span id="view-count">...</span> ครั้ง</div>
+        <div class="section-title">🕵️ เลข IP ผู้เข้าชมล่าสุด</div>
+        <div id="ip-list"><div class="ip-item">กำลังดึงข้อมูลระบบ...</div></div>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+            <h2 style="color: #00FF66; margin-bottom: 15px;">🔒 ลงชื่อเข้าใช้เพื่อเล่นเกม</h2>
+            <input type="text" id="username" class="login-input" placeholder="ชื่อผู้ใช้งาน">
+            <input type="password" id="password" class="login-input" placeholder="รหัสผ่าน">
+            <button class="btn-submit" onclick="checkLogin()">เข้าสู่ระบบ</button>
+        </div>
+    </div>
+
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('contactModal')">&times;</span>
+            <h2 style="color: #00FF66; margin-bottom: 20px;">📞 ข้อมูลติดต่อ</h2>
+            <p style="color:#fff; text-align:left; margin-bottom: 10px;"><b>Facebook:</b> พี่ดำสุดหล่อ</p>
+            <p style="color:#fff; text-align:left; margin-bottom: 10px;"><b>Instagram:</b> @black_handsome</p>
+            <p style="color:#fff; text-align:left; margin-bottom: 10px;"><b>Email:</b> black6767@gmail.com</p>
+        </div>
+    </div>
+
+    <div class="modal" id="gameModal">
+        <div id="game-container">
+            <span class="close-btn" onclick="closeGameModal()">❌ ออกเกม</span>
+            <h2 style="color: #00FF66; margin-bottom: 10px;">🦖 SPACE DINO</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">กด Spacebar หรือ จิ้มหน้าจอเพื่อกระโดดหลบกระบองเพชร</p>
+            <canvas id="gameCanvas" width="500" height="200"></canvas>
+            <div style="color:#00FF66; margin-top:10px; font-weight:bold;">
+                คะแนน: <span id="score">0</span> | สูงสุด: <span id="high-score">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, runTransaction, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            authDomain: "anonymous-2af70.firebaseapp.com",
+            projectId: "anonymous-2af70",
+            storageBucket: "anonymous-2af70.firebasestorage.app",
+            messagingSenderId: "56629997561",
+            appId: "1:56629997561:web:90d1bce34024fd782d728",
+            measurementId: "G-K96C5CY8CC",
+            databaseURL: "https://anonymous-2af70-default-rtdb.firebaseio.com",
+            apiKey: "AIzaSyBZvq_HkJ_U7b-Iw"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const viewCountEl = document.getElementById("view-count");
+        const ipListEl = document.getElementById("ip-list");
+
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(async (data) => {
+                const userIP = data.ip;
+                const ipHistoryRef = ref(db, 'ip_history');
+                const lastIpQuery = query(ipHistoryRef, limitToLast(1));
+                const snapshot = await get(lastIpQuery);
+                
                 let lastRecordedIp = "";
                 if (snapshot.exists() && snapshot.val()) {
                     const val = snapshot.val();
@@ -254,20 +380,16 @@
                 if (!lastRecordedIp || userIP !== lastRecordedIp) {
                     push(ipHistoryRef, { ip: userIP, timestamp: new Date().toISOString() });
                 }
-            })
-            .catch(err => console.error("ดึง IP พัง: ", err));
+            }).catch(err => console.error(err));
 
-        // 2. ระบบนับยอดวิวรวมเพิ่มทีละ 1
         const totalViewsRef = ref(db, 'total_views');
         runTransaction(totalViewsRef, (currentValue) => { return (currentValue || 0) + 1; });
 
-        // 3. แสดงผลยอดวิวแบบ Realtime
         onValue(totalViewsRef, (snapshot) => {
             const views = snapshot.val() || 1;
             if(viewCountEl) viewCountEl.innerText = views.toLocaleString();
         });
 
-        // 4. แสดงผลรายการ IP ทั้งหมดแบบเรียลไทม์
         const ipHistoryRef = ref(db, 'ip_history');
         onValue(ipHistoryRef, (snapshot) => {
             if(ipListEl) {
@@ -294,17 +416,64 @@
     </script>
 
     <script>
-        // --- ระบบควบคุมสลับหน้าและฟังก์ชัน Pop-up ---
-        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
-        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-        
+        // --- ระบบดวงดาวเคลื่อนที่ ---
+        const spaceCanvas = document.getElementById("space-canvas");
+        const sCtx = spaceCanvas.getContext("2d");
+        let stars = [];
+
+        function resizeCanvas() {
+            spaceCanvas.width = window.innerWidth;
+            spaceCanvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        for(let i=0; i<100; i++) {
+            stars.push({
+                x: Math.random() * spaceCanvas.width,
+                y: Math.random() * spaceCanvas.height,
+                size: Math.random() * 2,
+                speed: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function animateSpace() {
+            sCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+            sCtx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            
+            stars.forEach(star => {
+                sCtx.beginPath();
+                sCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                sCtx.fill();
+                
+                star.y += star.speed;
+                if(star.y > spaceCanvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * spaceCanvas.width;
+                }
+            });
+            requestAnimationFrame(animateSpace);
+        }
+        animateSpace();
+
+        // --- ระบบเมนูสไลด์และ Modals ---
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('active');
+        }
+        function openModal(id) {
+            toggleSidebar();
+            document.getElementById(id).style.display = 'flex';
+        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
         function checkLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            if(user.trim() !== "" && pass.trim() !== "") {
-                closeLoginModal();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if(u.trim() !== "" && p.trim() !== "") {
+                closeModal('loginModal');
                 document.getElementById('gameModal').style.display = 'flex';
-                document.getElementById('game-container').style.display = 'block';
+                document.getElementById('
+    document.getElementById('game-container').style.display = 'block';
                 initGame(); // เริ่มรันตัวเกม
             } else {
                 alert("กรุณากรอก Username และ Password อะไรก็ได้เพื่อเข้าเล่นเกมมึง!");
