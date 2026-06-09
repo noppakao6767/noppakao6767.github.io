@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ประวัติการเข้าชมเว็บ</title>
+    <title>พี่ดำสุดหล่อ - Link & Visitors</title>
     <style>
-        /* ดึงธีมหน้าเว็บเดิมของมึงกลับมา: พื้นหลังดำ มีเอฟเฟกต์ดาวระยิบระยับ */
+        /* ฉากหลังอวกาศมืด มีดาวระยิบระยับแบบเว็บเดิมของมึง */
         body {
             background-color: #000000;
             background-image: 
@@ -22,96 +22,152 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            box-sizing: border-box;
         }
 
-        /* กล่องมน ๆ สีดำโปร่งแสงแบบเว็บเดิมของมึงเป๊ะ ๆ */
-        .container {
+        /* การ์ดหลักที่มีขอบเรืองแสงนีออนสีเขียวแบบหน้าเดิมมึงเป๊ะ */
+        .main-card {
             background: rgba(17, 17, 17, 0.85);
             backdrop-filter: blur(10px);
+            border: 2px solid #00FF66;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
             border-radius: 30px;
-            padding: 35px;
+            padding: 35px 25px;
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 380px;
+            text-align: center;
         }
 
-        /* ข้อความหัวข้อสีเขียวสว่างตามรูปมึง */
-        h2 {
+        /* รูปโปรไฟล์วงกลมขอบเรืองแสงสีเขียว */
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a855f7, #3b82f6);
+            margin: 0 auto 20px auto;
+            border: 3px solid #00FF66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+        }
+
+        /* ข้อความ พี่ดำสุดหล่อ เรืองแสง */
+        .profile-name {
             color: #00FF66;
-            font-size: 24px;
-            margin: 0 0 8px 0;
+            font-size: 32px;
             font-weight: bold;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.8);
         }
 
-        .subtitle {
-            color: #00FF66;
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-
-        /* ช่องแสดงยอดวิวที่มึงอยากให้เหมือนกันทุกคน */
-        .view-box {
-            margin-bottom: 25px;
-            padding: 5px 0;
-        }
-
-        .view-label {
-            color: #888888;
-            font-size: 15px;
-            margin-bottom: 5px;
-        }
-
-        .view-count-text {
-            color: #00FF66;
-            font-size: 26px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .ip-label {
+        .status-connecting {
             color: #00FF66;
             font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+        }
+
+        .profile-id {
+            color: #888888;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        /* ปุ่มกดโซเชียลมีเดีย */
+        .btn-link {
+            display: block;
+            background-color: #161616;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid #222222;
+            transition: 0.3s;
+        }
+        .btn-link:hover {
+            background-color: #222222;
+            border-color: #00FF66;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+        }
+
+        /* ส่วนแบ่งเนื้อหาหลังบ้าน Firebase ด้านล่าง */
+        .separator-line {
+            border-top: 1px dashed rgba(0, 255, 102, 0.3);
+            margin: 30px 0 20px 0;
+        }
+
+        .section-title {
+            color: #00FF66;
+            font-size: 16px;
+            font-weight: bold;
             margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .view-counter {
+            text-align: left;
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 3px solid #00FF66;
+        }
+        .view-counter span {
+            color: #00FF66;
+            font-size: 20px;
             font-weight: bold;
         }
 
-        /* เส้นแบ่งสไตล์เรียบหรูสีเขียวจาง ๆ แบบรูปแรก */
-        .line-separator {
-            border-bottom: 1px solid rgba(0, 255, 102, 0.2);
-            margin: 12px 0;
+        /* กล่องสไตล์รายการเลข IP ผู้เข้าชม */
+        #ip-list {
+            text-align: left;
+            max-height: 180px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
-
-        /* รายการ IP สีเขียวสว่างแยกบรรทัด */
         .ip-item {
             color: #00FF66;
             font-family: monospace;
-            font-size: 16px;
-            padding: 2px 0;
+            font-size: 14px;
+            padding: 4px 0;
             word-break: break-all;
+        }
+        .ip-split {
+            border-bottom: 1px solid rgba(0, 255, 102, 0.15);
+            margin: 6px 0;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>🕵️ ประวัติการเข้าชม</h2>
-        <div class="subtitle">ล่าสุด (แชร์ข้อมูลร่วมกันของทุกคน)</div>
+    <div class="main-card">
+        <div class="profile-img"></div>
         
-        <div class="view-box">
-            <div class="view-label">ยอดการดูเว็บทั้งหมด</div>
-            <div class="view-count-text"><span id="view-count">1</span> ครั้ง</div>
+        <div class="profile-name">พี่ดำสุดหล่อ</div>
+        <div class="status-connecting">CONNECTING...</div>
+        <div class="profile-id">ID: 6767</div>
+
+        <a href="https://facebook.com" target="_blank" class="btn-link">Facebook</a>
+        <a href="https://instagram.com" target="_blank" class="btn-link">Instagram</a>
+
+        <div class="separator-line"></div>
+
+        <div class="view-counter">
+            ยอดการดูเว็บทั้งหมด: <span id="view-count">...</span> ครั้ง
         </div>
 
-        <div class="ip-label">เลข IP ผู้เข้าชม</div>
-        
+        <div class="section-title">🕵️ เลข IP ผู้เข้าชมล่าสุด</div>
         <div id="ip-list">
-            </div>
+            <div class="ip-item">กำลังดึงข้อมูลระบบ...</div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, runTransaction, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             authDomain: "anonymous-2af70.firebaseapp.com",
@@ -130,20 +186,34 @@
         const viewCountEl = document.getElementById("view-count");
         const ipListEl = document.getElementById("ip-list");
 
-        // 1. บันทึก IP ลงฐานข้อมูลกลางร่วมกัน
+        // 1. ดึง IP มาตรวจสอบและเซฟลง Firebase
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
-            .then(data => {
+            .then(async (data) => {
                 const userIP = data.ip;
                 const ipHistoryRef = ref(db, 'ip_history');
-                push(ipHistoryRef, {
-                    ip: userIP,
-                    timestamp: new Date().toISOString()
-                });
+                
+                const lastIpQuery = query(ipHistoryRef, limitToLast(1));
+                const snapshot = await get(lastIpQuery);
+                
+                let lastRecordedIp = "";
+                if (snapshot.exists() && snapshot.val()) {
+                    const val = snapshot.val();
+                    const lastKey = Object.keys(val)[0];
+                    lastRecordedIp = val[lastKey].ip;
+                }
+
+                // ถ้าไม่มีข้อมูลเก่าเลย หรือ IP ใหม่ไม่ซ้ำกับอันล่าสุด ให้ทำการเซฟลงฐานข้อมูล
+                if (!lastRecordedIp || userIP !== lastRecordedIp) {
+                    push(ipHistoryRef, {
+                        ip: userIP,
+                        timestamp: new Date().toISOString()
+                    });
+                }
             })
             .catch(err => console.error("ดึง IP พัง: ", err));
 
-        // 2. ระบบนับยอดวิวรวมเพิ่มทีละ 1 
+        // 2. ระบบนับยอดวิวรวมเพิ่มทีละ 1
         const totalViewsRef = ref(db, 'total_views');
         runTransaction(totalViewsRef, (currentValue) => {
             return (currentValue || 0) + 1;
@@ -155,7 +225,7 @@
             if(viewCountEl) viewCountEl.innerText = views.toLocaleString();
         });
 
-        // 4. แสดงผลประวัติ IP ร่วมกันทั้งหมดพร้อมเส้นแบ่ง
+        // 4. แสดงผลรายการ IP ทั้งหมดแบบเรียลไทม์
         const ipHistoryRef = ref(db, 'ip_history');
         onValue(ipHistoryRef, (snapshot) => {
             if(ipListEl) {
@@ -169,13 +239,14 @@
                         div.innerText = item.ip;
                         ipListEl.appendChild(div);
 
-                        // ใส่เส้นแบ่งคั่นระหว่าง IP เหมือนเว็บเดิมมึง
                         if (index < entries.length - 1) {
                             const line = document.createElement("div");
-                            line.className = "line-separator";
+                            line.className = "ip-split";
                             ipListEl.appendChild(line);
                         }
                     });
+                } else {
+                    ipListEl.innerHTML = "<div class='ip-item' style='color:#888;'>ไม่มีประวัติ</div>";
                 }
             }
         });
