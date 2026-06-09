@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พี่ดำสุดหล่อ - Link & Visitors</title>
+    <title>พี่ดำสุดหล่อ - Link & Dinosaur Game</title>
     <style>
         /* ฉากหลังอวกาศมืด มีดาวระยิบระยับแบบเว็บเดิมของมึง */
         body {
@@ -36,9 +36,9 @@
             width: 100%;
             max-width: 380px;
             text-align: center;
+            position: relative;
         }
 
-        /* รูปโปรไฟล์วงกลมขอบเรืองแสงสีเขียว */
         .profile-img {
             width: 150px;
             height: 150px;
@@ -49,7 +49,6 @@
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
         }
 
-        /* ข้อความ พี่ดำสุดหล่อ เรืองแสง */
         .profile-name {
             color: #00FF66;
             font-size: 32px;
@@ -86,6 +85,7 @@
             font-weight: bold;
             border: 1px solid #222222;
             transition: 0.3s;
+            cursor: pointer;
         }
         .btn-link:hover {
             background-color: #222222;
@@ -93,12 +93,93 @@
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
         }
 
-        /* ส่วนแบ่งเนื้อหาหลังบ้าน Firebase ด้านล่าง */
+        /* ปุ่ม Login เล่นเกมสีเขียวนีออนเด่น ๆ */
+        .btn-login {
+            background-color: #00FF66;
+            color: #000000;
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
+        }
+        .btn-login:hover {
+            background-color: #00cc55;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
+        }
+
+        /* ระบบหน้าต่าง Pop-up (Modal) สำหรับ Login และ เล่นเกม */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #111111;
+            border: 2px solid #00FF66;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            color: #888; font-size: 24px; cursor: pointer;
+        }
+        .close-btn:hover { color: #00FF66; }
+
+        /* ฟอร์มกรอก Login */
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .login-input:focus {
+            border-color: #00FF66;
+            outline: none;
+        }
+
+        /* สไตล์หน้าต่างเกมไดโนเสาร์ */
+        #game-container {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            background: #111;
+            border: 2px solid #00FF66;
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+        }
+        #gameCanvas {
+            background: #161616;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            border-bottom: 3px solid #00FF66;
+            max-width: 100%;
+        }
+        .game-info {
+            color: #00FF66;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* ระบบดึงข้อมูลเดิมด้านล่าง */
         .separator-line {
             border-top: 1px dashed rgba(0, 255, 102, 0.3);
             margin: 30px 0 20px 0;
         }
-
         .section-title {
             color: #00FF66;
             font-size: 16px;
@@ -106,7 +187,6 @@
             margin-bottom: 15px;
             text-align: left;
         }
-
         .view-counter {
             text-align: left;
             background: rgba(255,255,255,0.03);
@@ -115,53 +195,53 @@
             margin-bottom: 15px;
             border-left: 3px solid #00FF66;
         }
-        .view-counter span {
-            color: #00FF66;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        /* กล่องสไตล์รายการเลข IP ผู้เข้าชม */
-        #ip-list {
-            text-align: left;
-            max-height: 180px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        .ip-item {
-            color: #00FF66;
-            font-family: monospace;
-            font-size: 14px;
-            padding: 4px 0;
-            word-break: break-all;
-        }
-        .ip-split {
-            border-bottom: 1px solid rgba(0, 255, 102, 0.15);
-            margin: 6px 0;
-        }
+        .view-counter span { color: #00FF66; font-size: 20px; font-weight: bold; }
+        #ip-list { text-align: left; max-height: 120px; overflow-y: auto; }
+        .ip-item { color: #00FF66; font-family: monospace; font-size: 14px; padding: 4px 0; word-break: break-all; }
+        .ip-split { border-bottom: 1px solid rgba(0, 255, 102, 0.15); margin: 6px 0; }
     </style>
 </head>
 <body>
 
-    <div class="main-card">
+    <div class="main-card" id="home-page">
         <div class="profile-img"></div>
-        
         <div class="profile-name">พี่ดำสุดหล่อ</div>
         <div class="status-connecting">CONNECTING...</div>
         <div class="profile-id">ID: 6767</div>
+
+        <button class="btn-link btn-login" onclick="openLoginModal()">🎮 เข้าสู่ระบบเล่นเกม 🦖</button>
 
         <a href="https://facebook.com" target="_blank" class="btn-link">Facebook</a>
         <a href="https://instagram.com" target="_blank" class="btn-link">Instagram</a>
 
         <div class="separator-line"></div>
-
-        <div class="view-counter">
-            ยอดการดูเว็บทั้งหมด: <span id="view-count">...</span> ครั้ง
-        </div>
-
+        <div class="view-counter">ยอดการดูเว็บทั้งหมด: <span id="view-count">...</span> ครั้ง</div>
         <div class="section-title">🕵️ เลข IP ผู้เข้าชมล่าสุด</div>
-        <div id="ip-list">
-            <div class="ip-item">กำลังดึงข้อมูลระบบ...</div>
+        <div id="ip-list"><div class="ip-item">กำลังดึงข้อมูลระบบ...</div></div>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeLoginModal()">&times;</span>
+            <h2 style="color: #00FF66; margin-bottom: 20px;">🔒 LOGIN</h2>
+            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">(ตั้งไอดีอะไรก็ได้เพื่อเข้าเล่นเกม)</p>
+            <input type="text" id="username" class="login-input" placeholder="ชื่อผู้ใช้งาน / Username">
+            <input type="password" id="password" class="login-input" placeholder="รหัสผ่าน / Password">
+            <button class="btn-link btn-login" style="width:100%; margin-top:15px;" onclick="checkLogin()">ตกลง เข้าสู่ระบบ</button>
+        </div>
+    </div>
+
+    <div class="modal" id="gameModal">
+        <div id="game-container">
+            <span class="close-btn" onclick="closeGameModal()" style="color:#fff;">❌ ออกเกม</span>
+            <h2 style="color: #00FF66; margin-bottom: 10px;">🦖 DINO RUNNER</h2>
+            <p style="color: #888; font-size: 13px; margin: 0 0 15px 0;">กด Spacebar บนคอม หรือ จิ้มหน้าจอมือถือ เพื่อกระโดด</p>
+            
+            <canvas id="gameCanvas" width="550" height="200"></canvas>
+            
+            <div class="game-info">
+                คะแนนปัจจุบัน: <span id="score">0</span> | คะแนนสูงสุด: <span id="high-score">0</span>
+            </div>
         </div>
     </div>
 
@@ -192,7 +272,6 @@
             .then(async (data) => {
                 const userIP = data.ip;
                 const ipHistoryRef = ref(db, 'ip_history');
-                
                 const lastIpQuery = query(ipHistoryRef, limitToLast(1));
                 const snapshot = await get(lastIpQuery);
                 
@@ -203,21 +282,15 @@
                     lastRecordedIp = val[lastKey].ip;
                 }
 
-                // ถ้าไม่มีข้อมูลเก่าเลย หรือ IP ใหม่ไม่ซ้ำกับอันล่าสุด ให้ทำการเซฟลงฐานข้อมูล
                 if (!lastRecordedIp || userIP !== lastRecordedIp) {
-                    push(ipHistoryRef, {
-                        ip: userIP,
-                        timestamp: new Date().toISOString()
-                    });
+                    push(ipHistoryRef, { ip: userIP, timestamp: new Date().toISOString() });
                 }
             })
             .catch(err => console.error("ดึง IP พัง: ", err));
 
         // 2. ระบบนับยอดวิวรวมเพิ่มทีละ 1
         const totalViewsRef = ref(db, 'total_views');
-        runTransaction(totalViewsRef, (currentValue) => {
-            return (currentValue || 0) + 1;
-        });
+        runTransaction(totalViewsRef, (currentValue) => { return (currentValue || 0) + 1; });
 
         // 3. แสดงผลยอดวิวแบบ Realtime
         onValue(totalViewsRef, (snapshot) => {
@@ -238,7 +311,6 @@
                         div.className = "ip-item";
                         div.innerText = item.ip;
                         ipListEl.appendChild(div);
-
                         if (index < entries.length - 1) {
                             const line = document.createElement("div");
                             line.className = "ip-split";
@@ -250,6 +322,160 @@
                 }
             }
         });
+    </script>
+
+    <script>
+        // --- ระบบควบคุมสลับหน้าและฟังก์ชัน Pop-up ---
+        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+        
+        function checkLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            if(user.trim() !== "" && pass.trim() !== "") {
+                closeLoginModal();
+                document.getElementById('gameModal').style.display = 'flex';
+                document.getElementById('game-container').style.display = 'block';
+                initGame(); // เริ่มรันตัวเกม
+            } else {
+                alert("กรุณากรอก Username และ Password อะไรก็ได้เพื่อเข้าเล่นเกมมึง!");
+            }
+        }
+
+        function closeGameModal() {
+            document.getElementById('gameModal').style.display = 'none';
+            stopGame();
+        }
+
+        // --- ระบบโค้ดเกมไดโนเสาร์กระโดดหลบกระบองเพชร (HTML5 Canvas) ---
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let gameAnimationId;
+        let score = 0;
+        let highScore = 0;
+        let isPlaying = false;
+
+        // ตัวแปรวัตถุในเกม
+        let dino = { x: 50, y: 140, width: 25, height: 40, vy: 0, gravity: 1.2, jumpForce: -16, isGrounded: false };
+        let obstacles = [];
+        let spawnTimer = 0;
+        let gameSpeed = 6;
+
+        function initGame() {
+            score = 0;
+            gameSpeed = 6;
+            obstacles = [];
+            dino.y = 140;
+            dino.vy = 0;
+            isPlaying = true;
+            document.getElementById("score").innerText = score;
+            
+            // ล้าง Loop ตัวเก่าถ้ามี
+            cancelAnimationFrame(gameAnimationId);
+            gameLoop();
+        }
+
+        function stopGame() {
+            isPlaying = false;
+            cancelAnimationFrame(gameAnimationId);
+        }
+
+        // ฟังการกดปุ่มกระโดด (Spacebar หรือ คลิก/ทัชหน้าจอ)
+        window.addEventListener("keydown", (e) => {
+            if (e.code === "Space" && dino.isGrounded && isPlaying) {
+                dino.vy = dino.jumpForce;
+                dino.isGrounded = false;
+            }
+        });
+        canvas.addEventListener("touchstart", () => {
+            if (dino.isGrounded && isPlaying) {
+                dino.vy = dino.jumpForce;
+                dino.isGrounded = false;
+            }
+        });
+        canvas.addEventListener("mousedown", () => {
+            if (dino.isGrounded && isPlaying) {
+                dino.vy = dino.jumpForce;
+                dino.isGrounded = false;
+            }
+        });
+
+        function gameLoop() {
+            if (!isPlaying) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // ฟิสิกส์ไดโนเสาร์ (กล่องสีเขียวนีออนสว่าง)
+            dino.vy += dino.gravity;
+            dino.y += dino.vy;
+
+            if (dino.y > 140) {
+                dino.y = 140;
+                dino.vy = 0;
+                dino.isGrounded = true;
+            }
+
+            // วาดตัวไดโนเสาร์
+            ctx.fillStyle = "#00FF66";
+            ctx.shadowColor = "#00FF66";
+            ctx.shadowBlur = 8;
+            ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+
+            // สุ่มสร้างต้นกระบองเพชร (กล่องสีแดงเรืองแสง)
+            spawnTimer++;
+            if (spawnTimer > Math.random() * 50 + 60) {
+                obstacles.push({
+                    x: canvas.width,
+                    y: 150,
+                    width: 15,
+                    height: 30
+                });
+                spawnTimer = 0;
+            }
+
+            // เลื่อนสิ่งกีดขวางและเช็กชน
+            ctx.fillStyle = "#FF3336";
+            ctx.shadowColor = "#FF3336";
+            ctx.shadowBlur = 8;
+            
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.x -= gameSpeed;
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+                // เช็กชน (Hitbox)
+                if (
+                    dino.x < obs.x + obs.width &&
+                    dino.x + dino.width > obs.x &&
+                    dino.y < obs.y + obs.height &&
+                    dino.y + dino.height > obs.y
+                ) {
+                    // ชนปุ๊บเกมโอเวอร์ทันที! เริ่มใหม่
+                    alert("💥 ชนกระบองเพชรเข้าให้! คะแนนมึงคือ: " + score + " แต้ม กดตกลงเพื่อลองอีกรอบ");
+                    initGame();
+                    return;
+                }
+
+                // ลบวัตถุที่เลยหน้าจอไปแล้วเพื่อบวกคะแนน
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(i, 1);
+                    score++;
+                    document.getElementById("score").innerText = score;
+                    if(score > highScore) {
+                        highScore = score;
+                        document.getElementById("high-score").innerText = highScore;
+                    }
+                    // เพิ่มความเร็วเกมขึ้นทุก ๆ 5 คะแนน
+                    if (score % 5 === 0) gameSpeed += 0.8;
+                }
+            }
+            
+            // ล้าง Shadow ดึงประสิทธิภาพกลับคืนมา
+            ctx.shadowBlur = 0;
+
+            gameAnimationId = requestAnimationFrame(gameLoop);
+        }
     </script>
 </body>
 </html>
