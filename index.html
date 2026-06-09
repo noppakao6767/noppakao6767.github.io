@@ -35,10 +35,13 @@
             pointer-events: none;
         }
 
-        /* เมนูบาร์ด้านบน */
+        /* เมนูบาร์ด้านบน - ปรับให้ Fixed ลอยตามติดหน้าจอ */
         .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            background: rgba(5, 5, 15, 0.9);
+            background: rgba(5, 5, 15, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 2px solid #00FF66;
@@ -46,8 +49,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
-            z-index: 100; 
+            z-index: 1000; /* ดันให้อยู่ชั้นบนสุด */
             box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
         }
 
@@ -61,7 +63,7 @@
             text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
         }
 
-        /* ปุ่ม 3 ขีดอันเดียว (ดันให้อยู่เลเยอร์บนสุด) */
+        /* ปุ่ม 3 ขีดลอยตามติดหน้าจอ */
         .nav-menu-btn {
             background: rgba(0, 255, 102, 0.15);
             color: #00FF66;
@@ -87,7 +89,7 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 998;
+            z-index: 1001;
             display: none;
         }
 
@@ -99,7 +101,7 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-left: 2px solid #00FF66;
-            z-index: 999;
+            z-index: 1002;
             transition: 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             padding: 80px 20px 20px 20px;
             display: flex;
@@ -131,12 +133,12 @@
         }
         .sidebar-link:hover { background: rgba(0, 255, 102, 0.2); }
 
-        /* แกนกลางจัดหน้าจอ */
+        /* แกนกลางจัดหน้าจอ (เว้นระยะด้านบน 80px เพื่อไม่ให้โดน Navbar ที่ลอยทับ) */
         .main-wrapper {
             flex: 1;
             width: 100%;
             max-width: 460px;
-            padding: 40px 20px;
+            padding: 100px 20px 40px 20px;
             position: relative;
             z-index: 10;
             display: flex;
@@ -144,7 +146,7 @@
             justify-content: center;
         }
 
-        /* คลาสสลับหน้าแบบเด็ดขาด (ซ่อนทุกหน้า ยกเว้นหน้าที่มี active) */
+        /* คลาสสลับหน้าแบบเด็ดขาด */
         .page-content {
             display: none !important;
         }
@@ -152,7 +154,7 @@
             display: block !important;
         }
 
-        /* การ์ดโปรไฟล์หน้าแรก (ลบปุ่ม ลบล็อกอิน ออกหมดแล้ว!) */
+        /* การ์ดโปรไฟล์หน้าแรก */
         .profile-card {
             background: rgba(10, 10, 25, 0.75);
             backdrop-filter: blur(15px);
@@ -247,7 +249,7 @@
         /* ฟุตเตอร์ท้ายเว็บ */
         .footer-section {
             width: 100%;
-            background: rgba(5, 5, 15, 0.9);
+            background: rgba(5, 5, 15, 0.95);
             border-top: 2px solid #00FF66;
             padding: 40px 20px;
             position: relative;
@@ -283,6 +285,7 @@
             gap: 8px;
         }
 
+        /* คอมโพเนนต์การ์ดเฟสบุ๊คแบบคลีน */
         .fake-fb-page {
             background: rgba(255, 255, 255, 0.05);
             color: #fff;
@@ -303,6 +306,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 18px;
         }
         .fb-follow-btn {
             background: rgba(0, 255, 102, 0.1);
@@ -313,7 +317,9 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: bold;
+            transition: 0.2s;
         }
+        .fb-follow-btn:hover { background: #00FF66; color: #000; }
     </style>
 </head>
 <body>
@@ -335,6 +341,225 @@
         <span class="close-sidebar" id="closeSidebarBtn">❌</span>
         <button class="sidebar-link" id="menuHomeBtn"><i class="fa-solid fa-terminal"></i> หน้าแรกโปรไฟล์</button>
         <button class="sidebar-link" id="menuLoginBtn"><i class="fa-solid fa-key"></i> เข้าสู่ระบบเล่นเกม</button>
+    </div>
+
+    <div class="main-wrapper">
+        
+        <div id="profilePage" class="page-content active-page">
+            <div class="profile-card">
+                <div class="profile-avatar"></div>
+                <div class="profile-title">พี่ดำสุดหล่อ</div>
+                <div class="profile-subtitle">SYSTEM ACTIVE // NODE: 6767</div>
+                <div style="color: rgba(0, 255, 102, 0.5); font-size: 13px;">STATUS: ONLINE</div>
+            </div>
+        </div>
+
+        <div id="loginPage" class="page-content page-container">
+            <h2><i class="fa-solid fa-terminal"></i> USER_AUTHENTICATION</h2>
+            <div class="input-box">
+                <input type="text" id="usernameInput" placeholder="ENTER USERNAME OR ID...">
+            </div>
+            <div class="input-box">
+                <input type="password" id="passwordInput" placeholder="ENTER ACCESS PASSWORD...">
+            </div>
+            <button class="submit-btn" id="confirmLoginBtn">EXECUTE LOGIN</button>
+            <div style="margin-top: 20px; color: rgba(0,255,102,0.5); cursor:pointer; text-decoration:underline;" id="abortLoginBtn">← ย้อนกลับหน้าหลัก</div>
+        </div>
+
+        <div id="gamePage" class="page-content page-container">
+            <h2><i class="fa-solid fa-satellite"></i> SPACE DINO GAME</h2>
+            <canvas id="gameCanvas" width="400" height="180"></canvas>
+            <div style="color: #00FF66; font-weight: bold; margin-bottom: 15px; font-size:14px;">
+                SCORE: <span id="currentScore">0</span> | HIGH: <span id="maxScore">0</span>
+            </div>
+            <button class="submit-btn" id="logOutBtn" style="border-color:#ff3333; color:#ff3333; background:rgba(255,51,51,0.1);">DISCONNECT GAME</button>
+        </div>
+
+    </div>
+
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-box">
+                <h3>Help ? (ช่วยเหลือ)</h3>
+                <ul class="footer-links">
+                    <li><i class="fa-solid fa-code"></i> เกี่ยวกับเกมและแมพ Roblox ของเรา</li>
+                    <li><i class="fa-solid fa-code"></i> วิธีแก้ปัญหาเข้าแมพแล้วหลุด บั๊กค้าง</li>
+                </ul>
+            </div>
+
+            <div class="footer-box">
+                <h3>Contact (ติดต่อเรา)</h3>
+                <ul class="footer-links">
+                    <li><i class="fa-solid fa-phone"></i> 6767676767</li>
+                    <li><i class="fa-solid fa-envelope"></i> kuyyesmam1@gmail.com</li>
+                    <li><i class="fa-solid fa-clock"></i> MONITORING: 24 HR</li>
+                </ul>
+            </div>
+
+            <div class="footer-box">
+                <h3>Social Terminal</h3>
+                <div class="fake-fb-page">
+                    <div class="fb-header">
+                        <div class="fb-logo-avatar">🕶️</div>
+                        <div>
+                            <div style="font-weight:bold; font-size:14px; color:#00FF66;">JO TO</div>
+                            <div style="font-size:11px; color:#88c999;">264 เพื่อนบนระบบ</div>
+                        </div>
+                    </div>
+                    <button class="fb-follow-btn"><i class="fa-brands fa-facebook"></i> เพิ่มเพื่อนในเฟส</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- เอฟเฟกต์ดาวไหล ---
+        const spaceCanvas = document.getElementById("space-canvas");
+        const sCtx = spaceCanvas.getContext("2d");
+        let stars = [];
+
+        function resizeCanvas() {
+            spaceCanvas.width = window.innerWidth;
+            spaceCanvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        for(let i=0; i<75; i++) {
+            stars.push({
+                x: Math.random() * spaceCanvas.width,
+                y: Math.random() * spaceCanvas.height,
+                size: Math.random() * 2 + 0.5,
+                speed: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function animateSpace() {
+            sCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+            sCtx.fillStyle = "rgba(0, 255, 102, 0.7)";
+            stars.forEach(star => {
+                sCtx.beginPath();
+                sCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                sCtx.fill();
+                star.y += star.speed;
+                if(star.y > spaceCanvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * spaceCanvas.width;
+                }
+            });
+            requestAnimationFrame(animateSpace);
+        }
+        animateSpace();
+
+        // --- ระบบเปิด-ปิด Sidebar ---
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const openSidebarBtn = document.getElementById('openSidebarBtn');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+        function toggleSidebar(open) {
+            if(open) {
+                sidebarMenu.classList.add('active');
+                sidebarOverlay.style.display = 'block';
+            } else {
+                sidebarMenu.classList.remove('active');
+                sidebarOverlay.style.display = 'none';
+            }
+        }
+
+        openSidebarBtn.addEventListener('click', () => toggleSidebar(true));
+        closeSidebarBtn.addEventListener('click', () => toggleSidebar(false));
+        sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
+
+        // --- ฟังก์ชันสลับหน้าเว็บ ---
+        const pageProfile = document.getElementById('profilePage');
+        const pageLogin = document.getElementById('loginPage');
+        const pageGame = document.getElementById('gamePage');
+
+        function showPage(pageId) {
+            toggleSidebar(false); // ปิดเมนูก่อน
+            
+            pageProfile.classList.remove('active-page');
+            pageLogin.classList.remove('active-page');
+            pageGame.classList.remove('active-page');
+
+            if(pageId === 'profile') pageProfile.classList.add('active-page');
+            if(pageId === 'login') pageLogin.classList.add('active-page');
+            if(pageId === 'game') pageGame.classList.add('active-page');
+        }
+
+        document.getElementById('menuHomeBtn').addEventListener('click', () => showPage('profile'));
+        document.getElementById('menuLoginBtn').addEventListener('click', () => showPage('login'));
+        document.getElementById('abortLoginBtn').addEventListener('click', () => showPage('profile'));
+
+        // --- ระบบล็อกอินสลับเข้าเกม ---
+        document.getElementById('confirmLoginBtn').addEventListener('click', function() {
+            const u = document.getElementById('usernameInput').value;
+            const p = document.getElementById('passwordInput').value;
+            if(u.trim() !== "" && p.trim() !== "") {
+                showPage('game');
+                initGame();
+            } else {
+                alert("กรอกไอดีกับรหัสผ่านก่อนมึง!");
+            }
+        });
+
+        document.getElementById('logOutBtn').addEventListener('click', function() {
+            isPlaying = false;
+            document.getElementById('usernameInput').value = "";
+            document.getElementById('passwordInput').value = "";
+            showPage('profile');
+        });
+
+        // --- มินิเกมกระโดดไดโนเสาร์ ---
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        let isPlaying = false, score = 0, highScore = 0;
+        let dino = { x: 30, y: 125, w: 20, h: 35, vy: 0, gravity: 1.1, jump: -13, grounded: false };
+        let obstacles = [], spawnTimer = 0, speed = 5;
+
+        function initGame() {
+            score = 0; speed = 5; obstacles = []; dino.y = 125; dino.vy = 0; isPlaying = true;
+            gameLoop();
+        }
+
+        function doJump() { if(dino.grounded && isPlaying) { dino.vy = dino.jump; dino.grounded = false; } }
+        window.addEventListener("keydown", (e) => { if(e.code === "Space") { e.preventDefault(); doJump(); } });
+        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); doJump(); });
+
+        function gameLoop() {
+            if(!isPlaying) return;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            dino.vy += dino.gravity; dino.y += dino.vy;
+            if(dino.y > 125) { dino.y = 125; dino.vy = 0; dino.grounded = true; }
+
+            ctx.fillStyle = "#00FF66"; ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+
+            spawnTimer++;
+            if(spawnTimer > Math.random()*40 + 60) {
+                obstacles.push({ x: canvas.width, y: 130, w: 15, h: 30 }); spawnTimer = 0;
+            }
+
+            ctx.fillStyle = "#ff3333";
+            for(let i=obstacles.length-1; i>=0; i--) {
+                let o = obstacles[i]; o.x -= speed; ctx.fillRect(o.x, o.y, o.w, o.h);
+
+                if(dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y < o.y + o.h && dino.y + dino.h > o.y) {
+                    alert("💥 GAME OVER! SCORE: " + score); initGame(); return;
+                }
+                if(o.x + o.w < 0) {
+                    obstacles.splice(i, 1); score++;
+                    document.getElementById("currentScore").innerText = score;
+                    if(score > highScore) { highScore = score; document.getElementById("maxScore").innerText = highScore; }
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
+บบเล่นเกม</button>
     </div>
 
     <div class="main-wrapper">
