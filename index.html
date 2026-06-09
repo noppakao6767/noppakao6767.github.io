@@ -6,464 +6,430 @@
     <title>พี่ดำสุดหล่อ - Space Mission Control</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', Courier, monospace, 'Segoe UI', Tahoma;
+            font-family: 'Courier New', Courier, monospace;
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            min-height: 100vh;
             background-color: #020208;
             color: #00FF66;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             overflow-x: hidden;
-            position: relative;
         }
 
-        /* === SPACE CANVAS - z-index ต้องต่ำกว่าทุกอย่าง === */
+        /* =========================================
+           SPACE CANVAS — แยกออกมาเป็น layer ล่างสุด
+           pointer-events: none + inert ป้องกันทับ
+        ========================================= */
         #space-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0; /* ต่ำสุด ไม่ทับปุ่ม */
-            pointer-events: none;
-        }
-
-        /* === NAVBAR === */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(5, 5, 15, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 2px solid #00FF66;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
-        }
-
-        .nav-logo {
-            font-size: 18px;
-            font-weight: bold;
-            color: #00FF66;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
-        }
-
-        .nav-menu-btn {
-            background: rgba(0, 255, 102, 0.15);
-            color: #00FF66;
-            border: 2px solid #00FF66;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
-            z-index: 1001;
-            position: relative;
-        }
-        .nav-menu-btn:hover, .nav-menu-btn:active {
-            background: #00FF66;
-            color: #000;
-        }
-
-        /* === SIDEBAR === */
-        .sidebar-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            display: none;
+            z-index: 1;
+            pointer-events: none !important;
+            touch-action: none !important;
+            user-select: none;
         }
 
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: -310px;
-            width: 290px;
-            height: 100%;
-            background: rgba(5, 5, 20, 0.98);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-left: 2px solid #00FF66;
-            z-index: 3000;
-            transition: right 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-            padding: 80px 20px 20px 20px;
+        /* =========================================
+           CONTENT LAYER — ทุกอย่างใน #app อยู่เหนือ canvas
+        ========================================= */
+        #app {
+            position: relative;
+            z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        .sidebar.active {
-            right: 0;
-        }
-
-        .close-sidebar {
-            position: absolute;
-            top: 20px; left: 20px;
-            color: #ff3333;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 3001;
-        }
-
-        .sidebar-link {
-            background: rgba(0, 255, 102, 0.05);
-            color: #00FF66;
-            border: 1px solid rgba(0, 255, 102, 0.4);
-            padding: 14px 15px;
-            border-radius: 8px;
-            text-align: left;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0;
             width: 100%;
+            background: rgba(2, 2, 15, 0.97);
+            border-bottom: 2px solid #00FF66;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0,255,102,0.15);
+        }
+
+        .nav-logo {
+            font-size: 17px;
+            font-weight: bold;
+            color: #00FF66;
             display: flex;
             align-items: center;
             gap: 10px;
-            transition: 0.2s;
-        }
-        .sidebar-link:hover, .sidebar-link:active {
-            background: rgba(0, 255, 102, 0.2);
+            text-shadow: 0 0 8px rgba(0,255,102,0.5);
+            pointer-events: none;
         }
 
-        /* === MAIN === */
+        #openSidebarBtn {
+            background: rgba(0,255,102,0.12);
+            color: #00FF66;
+            border: 2px solid #00FF66;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            /* สำคัญมาก: ทำให้กดได้แน่นอนทุกอุปกรณ์ */
+            position: relative;
+            z-index: 200;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            min-width: 48px;
+            min-height: 48px;
+        }
+        #openSidebarBtn:active { background: #00FF66; color: #000; }
+
+        /* SIDEBAR OVERLAY */
+        #sidebarOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 300;
+            touch-action: manipulation;
+        }
+
+        /* SIDEBAR */
+        #sidebarMenu {
+            position: fixed;
+            top: 0; right: -300px;
+            width: 280px; height: 100%;
+            background: #05050f;
+            border-left: 2px solid #00FF66;
+            z-index: 400;
+            transition: right 0.28s ease;
+            padding: 70px 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            touch-action: manipulation;
+        }
+        #sidebarMenu.open { right: 0; }
+
+        #closeSidebarBtn {
+            position: absolute;
+            top: 18px; left: 18px;
+            font-size: 22px;
+            color: #ff4444;
+            cursor: pointer;
+            min-width: 44px; min-height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .sidebar-link {
+            background: rgba(0,255,102,0.06);
+            color: #00FF66;
+            border: 1px solid rgba(0,255,102,0.35);
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+            touch-action: manipulation;
+            min-height: 50px;
+        }
+        .sidebar-link:active { background: rgba(0,255,102,0.2); }
+
+        /* MAIN WRAPPER */
         .main-wrapper {
-            flex: 1;
             width: 100%;
             max-width: 460px;
-            padding: 110px 20px 40px 20px;
-            position: relative;
-            z-index: 10;
+            padding: 100px 18px 40px;
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        .page-content {
-            display: none;
-        }
-        .page-content.active-page {
-            display: block;
-        }
+        /* PAGE SWITCH */
+        .page { display: none; }
+        .page.on { display: block; }
 
-        /* === PROFILE CARD === */
+        /* PROFILE CARD */
         .profile-card {
-            background: rgba(10, 10, 25, 0.75);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(8,8,22,0.8);
             border: 2px solid #00FF66;
-            border-radius: 24px;
-            padding: 45px 25px;
+            border-radius: 22px;
+            padding: 40px 22px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
+            box-shadow: 0 0 30px rgba(0,255,102,0.2);
         }
 
         .profile-avatar {
-            width: 140px;
-            height: 140px;
+            width: 140px; height: 140px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #00FF66, #00bcff);
-            margin: 0 auto 25px auto;
+            background: linear-gradient(135deg,#00FF66,#00bcff);
+            margin: 0 auto 22px;
+            border: 3px solid #00FF66;
+            box-shadow: 0 0 28px rgba(0,255,102,0.5);
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .profile-avatar img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .profile-title  { font-size: 28px; font-weight: bold; color: #00FF66; margin-bottom: 8px; }
+        .profile-sub    { font-size: 13px; color: #88c999; letter-spacing: 2px; margin-bottom: 8px; }
+        .profile-status { font-size: 12px; color: rgba(0,255,102,0.45); }
+
+        /* PAGE CONTAINER */
+        .page-box {
+            background: rgba(4,4,18,0.92);
             border: 2px solid #00FF66;
-            box-shadow: 0 0 25px rgba(0, 255, 102, 0.5);
-        }
-
-        .profile-title {
-            font-size: 30px;
-            font-weight: bold;
-            color: #00FF66;
-            margin-bottom: 8px;
-        }
-
-        .profile-subtitle {
-            font-size: 14px;
-            color: #88c999;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-
-        /* === PAGE CONTAINER (Login / Game) === */
-        .page-container {
-            background: rgba(5, 5, 20, 0.9);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 2px solid #00FF66;
-            border-radius: 20px;
-            padding: 35px 25px;
+            border-radius: 18px;
+            padding: 32px 22px;
             text-align: center;
-            box-shadow: 0 0 35px rgba(0, 255, 102, 0.3);
+            box-shadow: 0 0 30px rgba(0,255,102,0.25);
         }
+        .page-box h2 { color: #00FF66; font-size: 20px; margin-bottom: 22px; }
 
-        .page-container h2 {
-            color: #00FF66;
-            font-size: 22px;
-            margin-bottom: 25px;
-            font-weight: bold;
-        }
-
-        .input-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .input-box input {
+        /* INPUTS */
+        .input-wrap { margin-bottom: 16px; }
+        .input-wrap input {
             width: 100%;
-            padding: 14px;
-            background: rgba(0, 0, 0, 0.7);
+            padding: 13px;
+            background: rgba(0,0,0,0.65);
             border: 1px solid #00FF66;
             border-radius: 10px;
             color: #00FF66;
             font-size: 16px;
             outline: none;
         }
-        .input-box input::placeholder { color: rgba(0,255,102,0.4); }
+        .input-wrap input::placeholder { color: rgba(0,255,102,0.35); }
 
-        .submit-btn {
+        .btn-main {
             width: 100%;
-            background: rgba(0, 255, 102, 0.15);
+            background: rgba(0,255,102,0.12);
             color: #00FF66;
             border: 2px solid #00FF66;
-            padding: 14px;
+            padding: 13px;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
+            touch-action: manipulation;
         }
-        .submit-btn:hover, .submit-btn:active { background: #00FF66; color: #000; }
+        .btn-main:active { background: #00FF66; color: #000; }
 
-        /* === SOCIAL LOGIN === */
-        .social-login-group {
-            margin-top: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            border-top: 1px dashed rgba(0, 255, 102, 0.3);
-            padding-top: 20px;
+        .social-group {
+            margin-top: 22px;
+            border-top: 1px dashed rgba(0,255,102,0.25);
+            padding-top: 18px;
+            display: flex; flex-direction: column; gap: 11px;
         }
-
         .btn-social {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
+            width: 100%; padding: 12px; border-radius: 10px;
+            font-size: 14px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            border: none; touch-action: manipulation;
+        }
+        .btn-google   { background: #fff; color: #000; }
+        .btn-google:active { background: #ddd; }
+        .btn-facebook { background: #1877F2; color: #fff; }
+        .btn-facebook:active { background: #1256b0; }
+
+        .back-link {
+            margin-top: 18px;
+            color: rgba(0,255,102,0.5);
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: 0.2s;
-            border: none;
+            text-decoration: underline;
+            font-size: 14px;
+            touch-action: manipulation;
+            display: inline-block;
+            padding: 6px 0;
         }
 
-        .btn-google { background-color: #ffffff; color: #000000; }
-        .btn-google:hover { background-color: #e6e6e6; }
-
-        .btn-facebook { background-color: #1877F2; color: #ffffff; }
-        .btn-facebook:hover { background-color: #145dbf; }
-
-        /* === GAME CANVAS === */
+        /* GAME */
         #gameCanvas {
-            background: #050510;
+            background: #04040e;
             border-radius: 10px;
             display: block;
-            margin: 15px auto;
+            margin: 12px auto;
             border-bottom: 3px solid #00FF66;
             max-width: 100%;
         }
+        .score-bar { color: #00FF66; font-weight: bold; margin-bottom: 14px; font-size: 14px; }
+        .btn-danger {
+            border-color: #ff3333 !important;
+            color: #ff3333 !important;
+            background: rgba(255,51,51,0.08) !important;
+        }
 
-        /* === FOOTER === */
-        .footer-section {
+        /* FOOTER */
+        footer {
             width: 100%;
-            background: rgba(5, 5, 15, 0.95);
+            background: rgba(2,2,12,0.97);
             border-top: 2px solid #00FF66;
-            padding: 40px 20px;
-            position: relative;
-            z-index: 10;
-            margin-top: auto;
+            padding: 36px 18px;
         }
-
-        .footer-container {
-            width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
+        .footer-grid {
+            max-width: 1100px; margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+            gap: 28px;
         }
-
-        .footer-box h3 {
-            color: #00FF66;
-            font-size: 18px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid rgba(0, 255, 102, 0.4);
-            padding-bottom: 6px;
+        .footer-col h3 {
+            color: #00FF66; font-size: 17px;
+            border-bottom: 2px solid rgba(0,255,102,0.35);
+            padding-bottom: 5px; margin-bottom: 14px;
             display: inline-block;
         }
-
-        .footer-links { list-style: none; }
-        .footer-links li {
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #88c999;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .footer-list { list-style: none; }
+        .footer-list li {
+            font-size: 13px; color: #88c999;
+            margin-bottom: 9px;
+            display: flex; align-items: center; gap: 8px;
         }
-
-        .fake-fb-page {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            border: 1px solid rgba(0, 255, 102, 0.3);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .fb-widget {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(0,255,102,0.25);
+            border-radius: 8px; padding: 14px;
+            margin-top: 8px;
         }
-        .fb-header { display: flex; align-items: center; gap: 10px; }
-        .fb-logo-avatar {
-            width: 42px; height: 42px;
-            background-color: #1d1b3a;
-            border-radius: 50%;
-            border: 2px solid #00FF66;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
+        .fb-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .fb-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #1a1835; border: 2px solid #00FF66;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
-        .fb-follow-btn {
-            background: rgba(0, 255, 102, 0.1);
-            color: #00FF66;
-            border: 1px solid #00FF66;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            transition: 0.2s;
+        .fb-btn {
+            background: rgba(0,255,102,0.08);
+            color: #00FF66; border: 1px solid #00FF66;
+            padding: 7px 13px; border-radius: 7px;
+            cursor: pointer; font-size: 13px; font-weight: bold;
+            touch-action: manipulation;
         }
-        .fb-follow-btn:hover { background: #00FF66; color: #000; }
+        .fb-btn:active { background: #00FF66; color: #000; }
     </style>
 </head>
 <body>
 
-    <canvas id="space-canvas"></canvas>
+<!-- SPACE BG — อยู่นอก #app เพื่อไม่ให้ทับ event -->
+<canvas id="space-canvas" inert aria-hidden="true"></canvas>
+
+<!-- CONTENT LAYER -->
+<div id="app">
 
     <nav class="navbar">
         <div class="nav-logo">
             <i class="fa-solid fa-user-astronaut"></i> พี่ดำสุดหล่อ Terminal
         </div>
-        <button class="nav-menu-btn" id="openSidebarBtn">
+        <button id="openSidebarBtn" aria-label="เปิดเมนู">
             <i class="fa-solid fa-bars"></i> เมนู
         </button>
     </nav>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <div class="sidebar" id="sidebarMenu">
-        <span class="close-sidebar" id="closeSidebarBtn">❌</span>
-        <button class="sidebar-link" id="menuHomeBtn"><i class="fa-solid fa-terminal"></i> หน้าแรกโปรไฟล์</button>
-        <button class="sidebar-link" id="menuLoginBtn"><i class="fa-solid fa-key"></i> เข้าสู่ระบบเล่นเกม</button>
+    <div id="sidebarOverlay"></div>
+    <div id="sidebarMenu" role="dialog" aria-modal="true">
+        <span id="closeSidebarBtn" role="button" aria-label="ปิดเมนู">❌</span>
+        <button class="sidebar-link" data-page="profile"><i class="fa-solid fa-terminal"></i> หน้าแรกโปรไฟล์</button>
+        <button class="sidebar-link" data-page="login"><i class="fa-solid fa-key"></i> เข้าสู่ระบบเล่นเกม</button>
     </div>
 
     <div class="main-wrapper">
 
-        <div id="profilePage" class="page-content active-page">
+        <!-- หน้าโปรไฟล์ -->
+        <div id="page-profile" class="page on">
             <div class="profile-card">
-                <div class="profile-avatar"></div>
+                <div class="profile-avatar" id="avatarWrap">
+                    <!-- รูปจะถูกใส่ตรงนี้เมื่ออัปโหลด -->
+                </div>
                 <div class="profile-title">พี่ดำสุดหล่อ</div>
-                <div class="profile-subtitle">SYSTEM ACTIVE // NODE: 6767</div>
-                <div style="color: rgba(0, 255, 102, 0.5); font-size: 13px;">STATUS: ONLINE</div>
+                <div class="profile-sub">SYSTEM ACTIVE // NODE: 6767</div>
+                <div class="profile-status">STATUS: ONLINE</div>
             </div>
         </div>
 
-        <div id="loginPage" class="page-content page-container">
-            <h2><i class="fa-solid fa-terminal"></i> USER_AUTHENTICATION</h2>
-            <div class="input-box">
-                <input type="text" id="usernameInput" autocomplete="username" placeholder="ENTER USERNAME OR ID...">
-            </div>
-            <div class="input-box">
-                <input type="password" id="passwordInput" autocomplete="current-password" placeholder="ENTER ACCESS PASSWORD...">
-            </div>
-            <button class="submit-btn" id="loginSubmitBtn">EXECUTE LOGIN</button>
+        <!-- หน้าล็อกอิน -->
+        <div id="page-login" class="page">
+            <div class="page-box">
+                <h2><i class="fa-solid fa-terminal"></i> USER_AUTHENTICATION</h2>
+                <div class="input-wrap">
+                    <input type="text" id="usernameInput" autocomplete="username" placeholder="ENTER USERNAME OR ID...">
+                </div>
+                <div class="input-wrap">
+                    <input type="password" id="passwordInput" autocomplete="current-password" placeholder="ENTER ACCESS PASSWORD...">
+                </div>
+                <button class="btn-main" id="loginBtn">EXECUTE LOGIN</button>
 
-            <div class="social-login-group">
-                <button class="btn-social btn-google" id="googleLoginBtn">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_Logo.svg" alt="Google" style="width:18px; height:18px;">
-                    Sign in with Google
-                </button>
-                <button class="btn-social btn-facebook" id="fbLoginBtn">
-                    <i class="fa-brands fa-facebook-f" style="font-size:16px;"></i>
-                    Log in with Facebook
-                </button>
+                <div class="social-group">
+                    <button class="btn-social btn-google" id="googleBtn">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_Logo.svg" alt="Google" width="18" height="18">
+                        Sign in with Google
+                    </button>
+                    <button class="btn-social btn-facebook" id="fbBtn">
+                        <i class="fa-brands fa-facebook-f"></i> Log in with Facebook
+                    </button>
+                </div>
+                <span class="back-link" id="backBtn">← ย้อนกลับหน้าหลัก</span>
             </div>
-
-            <div style="margin-top:20px; color:rgba(0,255,102,0.5); cursor:pointer; text-decoration:underline;" id="abortLoginBtn">← ย้อนกลับหน้าหลัก</div>
         </div>
 
-        <div id="gamePage" class="page-content page-container">
-            <h2><i class="fa-solid fa-satellite"></i> SPACE DINO GAME</h2>
-            <canvas id="gameCanvas" width="400" height="180"></canvas>
-            <div style="color:#00FF66; font-weight:bold; margin-bottom:15px; font-size:14px;">
-                SCORE: <span id="currentScore">0</span> | HIGH: <span id="maxScore">0</span>
+        <!-- หน้าเกม -->
+        <div id="page-game" class="page">
+            <div class="page-box">
+                <h2><i class="fa-solid fa-satellite"></i> SPACE DINO GAME</h2>
+                <canvas id="gameCanvas" width="400" height="180"></canvas>
+                <div class="score-bar">SCORE: <span id="curScore">0</span> | HIGH: <span id="hiScore">0</span></div>
+                <button class="btn-main btn-danger" id="logoutBtn">DISCONNECT GAME</button>
             </div>
-            <button class="submit-btn" id="logOutBtn" style="border-color:#ff3333; color:#ff3333; background:rgba(255,51,51,0.1);">DISCONNECT GAME</button>
         </div>
 
     </div>
 
-    <footer class="footer-section">
-        <div class="footer-container">
-            <div class="footer-box">
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
                 <h3>Help ? (ช่วยเหลือ)</h3>
-                <ul class="footer-links">
+                <ul class="footer-list">
                     <li><i class="fa-solid fa-code"></i> เกี่ยวกับเกมและแมพ Roblox ของเรา</li>
                     <li><i class="fa-solid fa-code"></i> วิธีแก้ปัญหาเข้าแมพแล้วหลุด บั๊กค้าง</li>
                 </ul>
             </div>
-            <div class="footer-box">
+            <div class="footer-col">
                 <h3>Contact (ติดต่อเรา)</h3>
-                <ul class="footer-links">
+                <ul class="footer-list">
                     <li><i class="fa-solid fa-phone"></i> 6767676767</li>
                     <li><i class="fa-solid fa-envelope"></i> kuyyesmam1@gmail.com</li>
                     <li><i class="fa-solid fa-clock"></i> MONITORING: 24 HR</li>
                 </ul>
             </div>
-            <div class="footer-box">
+            <div class="footer-col">
                 <h3>Social Terminal</h3>
-                <div class="fake-fb-page">
-                    <div class="fb-header">
-                        <div class="fb-logo-avatar">🕶️</div>
+                <div class="fb-widget">
+                    <div class="fb-head">
+                        <div class="fb-avatar">🕶️</div>
                         <div>
-                            <div style="font-weight:bold; font-size:14px; color:#00FF66;">JO TO</div>
-                            <div style="font-size:11px; color:#88c999;">264 เพื่อนบนระบบ</div>
+                            <div style="font-weight:bold;font-size:14px;color:#00FF66;">JO TO</div>
+                            <div style="font-size:11px;color:#88c999;">264 เพื่อนบนระบบ</div>
                         </div>
                     </div>
-                    <button class="fb-follow-btn" onclick="window.open('https://facebook.com')">
+                    <button class="fb-btn" onclick="window.open('https://facebook.com')">
                         <i class="fa-brands fa-facebook"></i> เพิ่มเพื่อนในเฟส
                     </button>
                 </div>
@@ -471,136 +437,253 @@
         </div>
     </footer>
 
-    <script>
-    // =============================================
-    //  SPACE BACKGROUND — ดาว + อุกกาบาต + เนบิวลา
-    // =============================================
-    const spaceCanvas = document.getElementById("space-canvas");
-    const sCtx = spaceCanvas.getContext("2d");
+</div><!-- /#app -->
 
-    let stars = [], meteors = [], nebulas = [];
+<script>
+/* =====================================================
+   SPACE BACKGROUND
+===================================================== */
+(function() {
+    const cv = document.getElementById('space-canvas');
+    const cx = cv.getContext('2d');
+    let W, H, stars = [], meteors = [], nebs = [];
 
-    function resizeSpaceCanvas() {
-        spaceCanvas.width = window.innerWidth;
-        spaceCanvas.height = window.innerHeight;
-        initNebulas();
+    function resize() {
+        W = cv.width  = window.innerWidth;
+        H = cv.height = window.innerHeight;
+        nebs = [
+            {x:W*0.2, y:H*0.3, r:160, hue:160},
+            {x:W*0.8, y:H*0.6, r:140, hue:270},
+            {x:W*0.5, y:H*0.1, r:120, hue:200},
+            {x:W*0.1, y:H*0.8, r:100, hue:300},
+        ];
     }
-    window.addEventListener("resize", resizeSpaceCanvas);
+    window.addEventListener('resize', resize);
+    resize();
 
-    function initNebulas() {
-        nebulas = [];
-        for (let i = 0; i < 4; i++) {
-            nebulas.push({
-                x: Math.random() * spaceCanvas.width,
-                y: Math.random() * spaceCanvas.height,
-                r: 120 + Math.random() * 180,
-                hue: [160, 200, 270, 300][i],
-                alpha: 0.04 + Math.random() * 0.04
-            });
-        }
-    }
+    for (let i=0; i<130; i++) stars.push({
+        x: Math.random()*window.innerWidth,
+        y: Math.random()*window.innerHeight,
+        r: Math.random()*1.6+0.3,
+        vy: Math.random()*0.25+0.05,
+        t: Math.random()*Math.PI*2,
+        ts: 0.02+Math.random()*0.03
+    });
 
-    // สร้างดาว
-    for (let i = 0; i < 120; i++) {
-        stars.push({
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            size: Math.random() * 1.8 + 0.3,
-            speed: Math.random() * 0.3 + 0.05,
-            twinkle: Math.random() * Math.PI * 2,
-            twinkleSpeed: 0.02 + Math.random() * 0.03
-        });
-    }
-
-    // สร้างอุกกาบาต
-    function spawnMeteor() {
+    setInterval(()=>{
         meteors.push({
-            x: Math.random() * window.innerWidth * 1.5,
-            y: -10,
-            len: 80 + Math.random() * 80,
-            speed: 4 + Math.random() * 5,
-            alpha: 1,
-            angle: Math.PI / 5 + (Math.random() - 0.5) * 0.3
+            x: Math.random()*W*1.4, y:-10,
+            len:70+Math.random()*90,
+            spd:4+Math.random()*5,
+            a:1, ang: Math.PI/5+(Math.random()-0.5)*0.3
         });
+    }, 2400);
+
+    function draw() {
+        cx.clearRect(0,0,W,H);
+
+        nebs.forEach(n=>{
+            const g=cx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+            g.addColorStop(0,`hsla(${n.hue},100%,55%,0.07)`);
+            g.addColorStop(1,`hsla(${n.hue},100%,40%,0)`);
+            cx.fillStyle=g;
+            cx.beginPath(); cx.arc(n.x,n.y,n.r,0,Math.PI*2); cx.fill();
+        });
+
+        stars.forEach(s=>{
+            s.t+=s.ts;
+            const b=0.45+0.55*Math.sin(s.t);
+            cx.fillStyle=`rgba(0,255,102,${b*0.85})`;
+            cx.beginPath(); cx.arc(s.x,s.y,s.r*(0.7+b*0.3),0,Math.PI*2); cx.fill();
+            s.y+=s.vy;
+            if(s.y>H){s.y=0; s.x=Math.random()*W;}
+        });
+
+        for(let i=meteors.length-1;i>=0;i--){
+            const m=meteors[i];
+            const dx=Math.cos(m.ang)*m.len, dy=Math.sin(m.ang)*m.len;
+            const g=cx.createLinearGradient(m.x,m.y,m.x-dx,m.y-dy);
+            g.addColorStop(0,`rgba(0,255,180,${m.a})`);
+            g.addColorStop(1,`rgba(0,255,180,0)`);
+            cx.strokeStyle=g; cx.lineWidth=1.5;
+            cx.beginPath(); cx.moveTo(m.x,m.y); cx.lineTo(m.x-dx,m.y-dy); cx.stroke();
+            m.x+=Math.cos(m.ang)*m.spd; m.y+=Math.sin(m.ang)*m.spd;
+            m.a-=0.011;
+            if(m.a<=0||m.y>H) meteors.splice(i,1);
+        }
+        requestAnimationFrame(draw);
     }
-    setInterval(spawnMeteor, 2200);
+    draw();
+})();
 
-    function animateSpace() {
-        sCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+/* =====================================================
+   SIDEBAR  — ใช้ addEventListener แบบ passive:false
+   เพื่อแน่ใจว่า touch event ไม่ถูก browser intercept
+===================================================== */
+const sidebar  = document.getElementById('sidebarMenu');
+const overlay  = document.getElementById('sidebarOverlay');
+const openBtn  = document.getElementById('openSidebarBtn');
+const closeBtn = document.getElementById('closeSidebarBtn');
 
-        // วาดเนบิวลา
-        nebulas.forEach(n => {
-            const grad = sCtx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
-            grad.addColorStop(0, `hsla(${n.hue}, 100%, 60%, ${n.alpha * 2})`);
-            grad.addColorStop(1, `hsla(${n.hue}, 100%, 40%, 0)`);
-            sCtx.fillStyle = grad;
-            sCtx.beginPath();
-            sCtx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-            sCtx.fill();
-        });
+function openMenu(e)  { e.stopPropagation(); sidebar.classList.add('open'); overlay.style.display='block'; }
+function closeMenu()  { sidebar.classList.remove('open'); overlay.style.display='none'; }
 
-        // วาดดาว (กระพริบ)
-        stars.forEach(star => {
-            star.twinkle += star.twinkleSpeed;
-            const brightness = 0.5 + 0.5 * Math.sin(star.twinkle);
-            sCtx.fillStyle = `rgba(0, 255, 102, ${0.3 + brightness * 0.7})`;
-            sCtx.beginPath();
-            sCtx.arc(star.x, star.y, star.size * (0.7 + brightness * 0.3), 0, Math.PI * 2);
-            sCtx.fill();
+// ทั้ง click + touchend เพื่อรองรับทุกเบราว์เซอร์มือถือ
+['click','touchend'].forEach(ev=>{
+    openBtn.addEventListener(ev, openMenu, {passive:false});
+    closeBtn.addEventListener(ev, e=>{ e.stopPropagation(); closeMenu(); }, {passive:false});
+    overlay.addEventListener(ev, closeMenu, {passive:false});
+});
 
-            star.y += star.speed;
-            if (star.y > spaceCanvas.height) {
-                star.y = 0;
-                star.x = Math.random() * spaceCanvas.width;
-            }
-        });
+document.querySelectorAll('.sidebar-link').forEach(btn=>{
+    ['click','touchend'].forEach(ev=>{
+        btn.addEventListener(ev, e=>{
+            e.stopPropagation();
+            showPage(btn.dataset.page);
+        }, {passive:false});
+    });
+});
 
-        // วาดอุกกาบาต
-        for (let i = meteors.length - 1; i >= 0; i--) {
-            const m = meteors[i];
-            const dx = Math.cos(m.angle) * m.len;
-            const dy = Math.sin(m.angle) * m.len;
-            const grad = sCtx.createLinearGradient(m.x, m.y, m.x - dx, m.y - dy);
-            grad.addColorStop(0, `rgba(0, 255, 180, ${m.alpha})`);
-            grad.addColorStop(1, `rgba(0, 255, 180, 0)`);
-            sCtx.strokeStyle = grad;
-            sCtx.lineWidth = 1.5;
-            sCtx.beginPath();
-            sCtx.moveTo(m.x, m.y);
-            sCtx.lineTo(m.x - dx, m.y - dy);
-            sCtx.stroke();
+/* =====================================================
+   PAGE NAVIGATION
+===================================================== */
+function showPage(id) {
+    closeMenu();
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+    const el = document.getElementById('page-'+id);
+    if(el) el.classList.add('on');
+    if(id==='game') initGame();
+}
 
-            m.x += Math.cos(m.angle) * m.speed;
-            m.y += Math.sin(m.angle) * m.speed;
-            m.alpha -= 0.012;
+/* =====================================================
+   LOGIN
+===================================================== */
+document.getElementById('loginBtn').addEventListener('click', ()=>{
+    const u=document.getElementById('usernameInput').value.trim();
+    const p=document.getElementById('passwordInput').value.trim();
+    if(u&&p){ alert('ล็อกอินสำเร็จ! ยินดีต้อนรับ '+u); showPage('game'); }
+    else     { alert('กรุณากรอก Username และ Password ก่อนนะ'); }
+});
+document.getElementById('googleBtn').addEventListener('click', ()=>{ alert('ล็อกอินด้วย Google สำเร็จ!'); showPage('game'); });
+document.getElementById('fbBtn').addEventListener('click',     ()=>{ alert('ล็อกอินด้วย Facebook สำเร็จ!'); showPage('game'); });
+document.getElementById('backBtn').addEventListener('click',   ()=>showPage('profile'));
+document.getElementById('logoutBtn').addEventListener('click', ()=>showPage('profile'));
 
-            if (m.alpha <= 0 || m.y > spaceCanvas.height) {
-                meteors.splice(i, 1);
-            }
+/* =====================================================
+   DINO GAME
+===================================================== */
+let animId=null, gameOn=false, gScore=0, gHigh=0;
+let dino, obs, spd, fCount;
+
+function initGame(){
+    const cv=document.getElementById('gameCanvas');
+    const cx=cv.getContext('2d');
+    if(animId) cancelAnimationFrame(animId);
+    gameOn=true; gScore=0; spd=4; fCount=0;
+    dino={x:50,y:140,w:24,h:28,vy:0,ground:true};
+    obs=[];
+
+    function jump(){ if(dino.ground){dino.vy=-9;dino.ground=false;} }
+    document.onkeydown=e=>{ if(e.code==='Space'||e.code==='ArrowUp') jump(); };
+    cv.ontouchstart=e=>{ e.preventDefault(); jump(); };
+
+    function loop(){
+        if(!gameOn) return;
+        cx.clearRect(0,0,cv.width,cv.height);
+
+        cx.strokeStyle='#00FF66'; cx.lineWidth=2;
+        cx.beginPath(); cx.moveTo(0,168); cx.lineTo(cv.width,168); cx.stroke();
+
+        dino.vy+=0.5; dino.y+=dino.vy;
+        if(dino.y>=140){dino.y=140;dino.vy=0;dino.ground=true;}
+
+        cx.fillStyle='#00FF66';
+        cx.fillRect(dino.x,dino.y,dino.w,dino.h);
+        cx.fillRect(dino.x+4,dino.y-12,20,14);
+        cx.fillStyle='#020208';
+        cx.fillRect(dino.x+18,dino.y-9,4,4);
+
+        fCount++;
+        if(fCount%Math.max(55,85-Math.floor(gScore/200))===0){
+            obs.push({x:cv.width,y:135,w:13+Math.random()*10,h:28+Math.random()*16});
         }
 
-        requestAnimationFrame(animateSpace);
+        cx.fillStyle='#00ccff';
+        for(let i=obs.length-1;i>=0;i--){
+            const o=obs[i]; o.x-=spd;
+            cx.fillRect(o.x,o.y,o.w,o.h);
+            if(dino.x+dino.w-4>o.x+3&&dino.x+4<o.x+o.w-3&&dino.y+dino.h>o.y+3){
+                gameOn=false;
+                if(gScore>gHigh) gHigh=gScore;
+                document.getElementById('hiScore').textContent=gHigh;
+                cx.fillStyle='rgba(255,0,0,0.45)';
+                cx.fillRect(0,0,cv.width,cv.height);
+                cx.fillStyle='#ff4444';
+                cx.font='bold 16px Courier New';
+                cx.textAlign='center';
+                cx.fillText('GAME OVER — แตะ/Space เพื่อเล่นใหม่',cv.width/2,cv.height/2);
+                document.onkeydown=e=>{ if(e.code==='Space') initGame(); };
+                cv.ontouchstart=e=>{ e.preventDefault(); initGame(); };
+                return;
+            }
+            if(o.x+o.w<0) obs.splice(i,1);
+        }
+
+        gScore++;
+        if(gScore%500===0) spd+=0.4;
+        document.getElementById('curScore').textContent=gScore;
+        cx.fillStyle='rgba(0,255,102,0.3)';
+        cx.font='11px Courier New'; cx.textAlign='right';
+        cx.fillText('SPACE / แตะ = กระโดด',cv.width-8,18);
+        animId=requestAnimationFrame(loop);
     }
+    loop();
+}
 
-    resizeSpaceCanvas();
-    animateSpace();
+/* =====================================================
+   PROFILE IMAGE UPLOAD (สำหรับอัปโหลดรูปโปรไฟล์)
+   เพิ่ม input file ซ่อนไว้ กดที่รูปวงกลมเพื่อเลือก
+===================================================== */
+(function(){
+    const wrap = document.getElementById('avatarWrap');
 
-    // =============================================
-    //  SIDEBAR
-    // =============================================
-    const sidebarMenu    = document.getElementById('sidebarMenu');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const openSidebarBtn = document.getElementById('openSidebarBtn');
-    const closeSidebarBtn= document.getElementById('closeSidebarBtn');
+    // ใส่ placeholder icon ตอนยังไม่มีรูป
+    wrap.innerHTML = '<i class="fa-solid fa-user" style="font-size:56px;color:rgba(0,0,0,0.4)"></i>';
 
-    function openSidebar()  {
-        sidebarMenu.classList.add('active');
-        sidebarOverlay.style.display = 'block';
-    }
-    function closeSidebar() {
-        sidebarMenu.classList.remove('active');
-        sidebarOverlay.style.display = 'none';
-    }
+    const inp = document.createElement('input');
+    inp.type='file'; inp.accept='image/*';
+    inp.style.cssText='position:absolute;opacity:0;width:1px;height:1px;';
+    document.body.appendChild(inp);
 
-    openSbody>
+    // tooltip กดเพื่อเปลี่ยนรูป
+    wrap.title='กดเพื่อเปลี่ยนรูปโปรไฟล์';
+    wrap.style.cursor='pointer';
+    wrap.style.position='relative';
+
+    const hint=document.createElement('div');
+    hint.textContent='📷 กดเปลี่ยนรูป';
+    hint.style.cssText='position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:10px;background:rgba(0,0,0,0.65);color:#00FF66;padding:2px 7px;border-radius:6px;white-space:nowrap;pointer-events:none;';
+    wrap.appendChild(hint);
+
+    ['click','touchend'].forEach(ev=>{
+        wrap.addEventListener(ev, e=>{ e.preventDefault(); inp.click(); }, {passive:false});
+    });
+
+    inp.addEventListener('change', ()=>{
+        const file=inp.files[0];
+        if(!file) return;
+        const reader=new FileReader();
+        reader.onload=r=>{
+            wrap.innerHTML='';
+            const img=document.createElement('img');
+            img.src=r.target.result;
+            img.alt='โปรไฟล์';
+            wrap.appendChild(img);
+            wrap.title='กดเพื่อเปลี่ยนรูปโปรไฟล์';
+        };
+        reader.readAsDataURL(file);
+    });
+})();
+</script>
+</body>
 </html>
