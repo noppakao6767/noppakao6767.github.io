@@ -25,16 +25,18 @@
             position: relative;
         }
 
+        /* === SPACE CANVAS - z-index ต้องต่ำกว่าทุกอย่าง === */
         #space-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            z-index: 0; /* ต่ำสุด ไม่ทับปุ่ม */
             pointer-events: none;
         }
 
+        /* === NAVBAR === */
         .navbar {
             position: fixed;
             top: 0;
@@ -48,7 +50,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 9999;
+            z-index: 1000;
             box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
         }
 
@@ -76,48 +78,53 @@
             align-items: center;
             gap: 8px;
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+            z-index: 1001;
             position: relative;
-            z-index: 10000;
         }
-        .nav-menu-btn:hover { 
-            background: #00FF66; 
+        .nav-menu-btn:hover, .nav-menu-btn:active {
+            background: #00FF66;
             color: #000;
         }
 
+        /* === SIDEBAR === */
         .sidebar-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 19999;
+            z-index: 2000;
             display: none;
         }
 
         .sidebar {
             position: fixed;
-            top: 0; 
+            top: 0;
             right: -310px;
-            width: 290px; 
+            width: 290px;
             height: 100%;
             background: rgba(5, 5, 20, 0.98);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-left: 2px solid #00FF66;
-            z-index: 20000;
+            z-index: 3000;
             transition: right 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             padding: 80px 20px 20px 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        
-        .sidebar.active { 
-            right: 0 !important; 
+
+        .sidebar.active {
+            right: 0;
         }
-        
+
         .close-sidebar {
             position: absolute;
             top: 20px; left: 20px;
-            color: #ff3333; font-size: 24px; cursor: pointer;
+            color: #ff3333;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 3001;
         }
 
         .sidebar-link {
@@ -134,9 +141,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            transition: 0.2s;
         }
-        .sidebar-link:hover { background: rgba(0, 255, 102, 0.2); }
+        .sidebar-link:hover, .sidebar-link:active {
+            background: rgba(0, 255, 102, 0.2);
+        }
 
+        /* === MAIN === */
         .main-wrapper {
             flex: 1;
             width: 100%;
@@ -150,12 +161,13 @@
         }
 
         .page-content {
-            display: none !important;
+            display: none;
         }
         .page-content.active-page {
-            display: block !important;
+            display: block;
         }
 
+        /* === PROFILE CARD === */
         .profile-card {
             background: rgba(10, 10, 25, 0.75);
             backdrop-filter: blur(15px);
@@ -191,6 +203,7 @@
             margin-bottom: 10px;
         }
 
+        /* === PAGE CONTAINER (Login / Game) === */
         .page-container {
             background: rgba(5, 5, 20, 0.9);
             backdrop-filter: blur(15px);
@@ -222,7 +235,9 @@
             border-radius: 10px;
             color: #00FF66;
             font-size: 16px;
+            outline: none;
         }
+        .input-box input::placeholder { color: rgba(0,255,102,0.4); }
 
         .submit-btn {
             width: 100%;
@@ -236,8 +251,9 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .submit-btn:hover { background: #00FF66; color: #000; }
+        .submit-btn:hover, .submit-btn:active { background: #00FF66; color: #000; }
 
+        /* === SOCIAL LOGIN === */
         .social-login-group {
             margin-top: 25px;
             display: flex;
@@ -263,8 +279,12 @@
         }
 
         .btn-google { background-color: #ffffff; color: #000000; }
-        .btn-facebook { background-color: #1877F2; color: #ffffff; }
+        .btn-google:hover { background-color: #e6e6e6; }
 
+        .btn-facebook { background-color: #1877F2; color: #ffffff; }
+        .btn-facebook:hover { background-color: #145dbf; }
+
+        /* === GAME CANVAS === */
         #gameCanvas {
             background: #050510;
             border-radius: 10px;
@@ -274,6 +294,7 @@
             max-width: 100%;
         }
 
+        /* === FOOTER === */
         .footer-section {
             width: 100%;
             background: rgba(5, 5, 15, 0.95);
@@ -311,9 +332,46 @@
             align-items: center;
             gap: 8px;
         }
+
+        .fake-fb-page {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(0, 255, 102, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fb-header { display: flex; align-items: center; gap: 10px; }
+        .fb-logo-avatar {
+            width: 42px; height: 42px;
+            background-color: #1d1b3a;
+            border-radius: 50%;
+            border: 2px solid #00FF66;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+        }
+        .fb-follow-btn {
+            background: rgba(0, 255, 102, 0.1);
+            color: #00FF66;
+            border: 1px solid #00FF66;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .fb-follow-btn:hover { background: #00FF66; color: #000; }
     </style>
 </head>
 <body>
+
+    <canvas id="space-canvas"></canvas>
 
     <nav class="navbar">
         <div class="nav-logo">
@@ -333,14 +391,216 @@
     </div>
 
     <div class="main-wrapper">
+
         <div id="profilePage" class="page-content active-page">
             <div class="profile-card">
                 <div class="profile-avatar"></div>
                 <div class="profile-title">พี่ดำสุดหล่อ</div>
                 <div class="profile-subtitle">SYSTEM ACTIVE // NODE: 6767</div>
+                <div style="color: rgba(0, 255, 102, 0.5); font-size: 13px;">STATUS: ONLINE</div>
             </div>
         </div>
+
+        <div id="loginPage" class="page-content page-container">
+            <h2><i class="fa-solid fa-terminal"></i> USER_AUTHENTICATION</h2>
+            <div class="input-box">
+                <input type="text" id="usernameInput" autocomplete="username" placeholder="ENTER USERNAME OR ID...">
+            </div>
+            <div class="input-box">
+                <input type="password" id="passwordInput" autocomplete="current-password" placeholder="ENTER ACCESS PASSWORD...">
+            </div>
+            <button class="submit-btn" id="loginSubmitBtn">EXECUTE LOGIN</button>
+
+            <div class="social-login-group">
+                <button class="btn-social btn-google" id="googleLoginBtn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_Logo.svg" alt="Google" style="width:18px; height:18px;">
+                    Sign in with Google
+                </button>
+                <button class="btn-social btn-facebook" id="fbLoginBtn">
+                    <i class="fa-brands fa-facebook-f" style="font-size:16px;"></i>
+                    Log in with Facebook
+                </button>
+            </div>
+
+            <div style="margin-top:20px; color:rgba(0,255,102,0.5); cursor:pointer; text-decoration:underline;" id="abortLoginBtn">← ย้อนกลับหน้าหลัก</div>
+        </div>
+
+        <div id="gamePage" class="page-content page-container">
+            <h2><i class="fa-solid fa-satellite"></i> SPACE DINO GAME</h2>
+            <canvas id="gameCanvas" width="400" height="180"></canvas>
+            <div style="color:#00FF66; font-weight:bold; margin-bottom:15px; font-size:14px;">
+                SCORE: <span id="currentScore">0</span> | HIGH: <span id="maxScore">0</span>
+            </div>
+            <button class="submit-btn" id="logOutBtn" style="border-color:#ff3333; color:#ff3333; background:rgba(255,51,51,0.1);">DISCONNECT GAME</button>
+        </div>
+
     </div>
 
-</body>
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-box">
+                <h3>Help ? (ช่วยเหลือ)</h3>
+                <ul class="footer-links">
+                    <li><i class="fa-solid fa-code"></i> เกี่ยวกับเกมและแมพ Roblox ของเรา</li>
+                    <li><i class="fa-solid fa-code"></i> วิธีแก้ปัญหาเข้าแมพแล้วหลุด บั๊กค้าง</li>
+                </ul>
+            </div>
+            <div class="footer-box">
+                <h3>Contact (ติดต่อเรา)</h3>
+                <ul class="footer-links">
+                    <li><i class="fa-solid fa-phone"></i> 6767676767</li>
+                    <li><i class="fa-solid fa-envelope"></i> kuyyesmam1@gmail.com</li>
+                    <li><i class="fa-solid fa-clock"></i> MONITORING: 24 HR</li>
+                </ul>
+            </div>
+            <div class="footer-box">
+                <h3>Social Terminal</h3>
+                <div class="fake-fb-page">
+                    <div class="fb-header">
+                        <div class="fb-logo-avatar">🕶️</div>
+                        <div>
+                            <div style="font-weight:bold; font-size:14px; color:#00FF66;">JO TO</div>
+                            <div style="font-size:11px; color:#88c999;">264 เพื่อนบนระบบ</div>
+                        </div>
+                    </div>
+                    <button class="fb-follow-btn" onclick="window.open('https://facebook.com')">
+                        <i class="fa-brands fa-facebook"></i> เพิ่มเพื่อนในเฟส
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // =============================================
+    //  SPACE BACKGROUND — ดาว + อุกกาบาต + เนบิวลา
+    // =============================================
+    const spaceCanvas = document.getElementById("space-canvas");
+    const sCtx = spaceCanvas.getContext("2d");
+
+    let stars = [], meteors = [], nebulas = [];
+
+    function resizeSpaceCanvas() {
+        spaceCanvas.width = window.innerWidth;
+        spaceCanvas.height = window.innerHeight;
+        initNebulas();
+    }
+    window.addEventListener("resize", resizeSpaceCanvas);
+
+    function initNebulas() {
+        nebulas = [];
+        for (let i = 0; i < 4; i++) {
+            nebulas.push({
+                x: Math.random() * spaceCanvas.width,
+                y: Math.random() * spaceCanvas.height,
+                r: 120 + Math.random() * 180,
+                hue: [160, 200, 270, 300][i],
+                alpha: 0.04 + Math.random() * 0.04
+            });
+        }
+    }
+
+    // สร้างดาว
+    for (let i = 0; i < 120; i++) {
+        stars.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            size: Math.random() * 1.8 + 0.3,
+            speed: Math.random() * 0.3 + 0.05,
+            twinkle: Math.random() * Math.PI * 2,
+            twinkleSpeed: 0.02 + Math.random() * 0.03
+        });
+    }
+
+    // สร้างอุกกาบาต
+    function spawnMeteor() {
+        meteors.push({
+            x: Math.random() * window.innerWidth * 1.5,
+            y: -10,
+            len: 80 + Math.random() * 80,
+            speed: 4 + Math.random() * 5,
+            alpha: 1,
+            angle: Math.PI / 5 + (Math.random() - 0.5) * 0.3
+        });
+    }
+    setInterval(spawnMeteor, 2200);
+
+    function animateSpace() {
+        sCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+
+        // วาดเนบิวลา
+        nebulas.forEach(n => {
+            const grad = sCtx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+            grad.addColorStop(0, `hsla(${n.hue}, 100%, 60%, ${n.alpha * 2})`);
+            grad.addColorStop(1, `hsla(${n.hue}, 100%, 40%, 0)`);
+            sCtx.fillStyle = grad;
+            sCtx.beginPath();
+            sCtx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+            sCtx.fill();
+        });
+
+        // วาดดาว (กระพริบ)
+        stars.forEach(star => {
+            star.twinkle += star.twinkleSpeed;
+            const brightness = 0.5 + 0.5 * Math.sin(star.twinkle);
+            sCtx.fillStyle = `rgba(0, 255, 102, ${0.3 + brightness * 0.7})`;
+            sCtx.beginPath();
+            sCtx.arc(star.x, star.y, star.size * (0.7 + brightness * 0.3), 0, Math.PI * 2);
+            sCtx.fill();
+
+            star.y += star.speed;
+            if (star.y > spaceCanvas.height) {
+                star.y = 0;
+                star.x = Math.random() * spaceCanvas.width;
+            }
+        });
+
+        // วาดอุกกาบาต
+        for (let i = meteors.length - 1; i >= 0; i--) {
+            const m = meteors[i];
+            const dx = Math.cos(m.angle) * m.len;
+            const dy = Math.sin(m.angle) * m.len;
+            const grad = sCtx.createLinearGradient(m.x, m.y, m.x - dx, m.y - dy);
+            grad.addColorStop(0, `rgba(0, 255, 180, ${m.alpha})`);
+            grad.addColorStop(1, `rgba(0, 255, 180, 0)`);
+            sCtx.strokeStyle = grad;
+            sCtx.lineWidth = 1.5;
+            sCtx.beginPath();
+            sCtx.moveTo(m.x, m.y);
+            sCtx.lineTo(m.x - dx, m.y - dy);
+            sCtx.stroke();
+
+            m.x += Math.cos(m.angle) * m.speed;
+            m.y += Math.sin(m.angle) * m.speed;
+            m.alpha -= 0.012;
+
+            if (m.alpha <= 0 || m.y > spaceCanvas.height) {
+                meteors.splice(i, 1);
+            }
+        }
+
+        requestAnimationFrame(animateSpace);
+    }
+
+    resizeSpaceCanvas();
+    animateSpace();
+
+    // =============================================
+    //  SIDEBAR
+    // =============================================
+    const sidebarMenu    = document.getElementById('sidebarMenu');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const openSidebarBtn = document.getElementById('openSidebarBtn');
+    const closeSidebarBtn= document.getElementById('closeSidebarBtn');
+
+    function openSidebar()  {
+        sidebarMenu.classList.add('active');
+        sidebarOverlay.style.display = 'block';
+    }
+    function closeSidebar() {
+        sidebarMenu.classList.remove('active');
+        sidebarOverlay.style.display = 'none';
+    }
+
+    openSbody>
 </html>
