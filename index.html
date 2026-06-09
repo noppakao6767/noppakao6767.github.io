@@ -2,83 +2,34 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พี่ดำสุดหล่อ - Terminal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: monospace; }
-        body { background: #000; color: #00FF66; overflow-x: hidden; }
-        #space-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        
-        /* แก้ปัญหาการซ้อนทับ: ใช้ Container คุมทุกอย่าง */
-        #app { position: relative; z-index: 10; width: 100%; max-width: 460px; margin: 0 auto; padding: 80px 20px; }
-        
-        .navbar { position: fixed; top: 0; width: 100%; background: rgba(5,5,20,0.9); border-bottom: 2px solid #00FF66; padding: 15px 20px; display: flex; justify-content: space-between; z-index: 100; }
-        
-        /* แก้ไข Profile Avatar: ดึงรูปจาก GitHub ให้ตรง */
-        .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 2px solid #00FF66; background-image: url('https://noppakao6767.github.io/IMG_20260419_061914_854.webp'); background-size: cover; background-position: center; margin: 0 auto 20px; }
-        
-        .card { background: rgba(5,5,20,0.8); border: 2px solid #00FF66; padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
-        .input-box { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #00FF66; color: #00FF66; border-radius: 5px; }
-        .btn { width: 100%; padding: 12px; background: rgba(0,255,102,0.1); border: 1px solid #00FF66; color: #00FF66; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-        
-        .page { display: none; }
-        .page.active { display: block; }
+        body { background: #000; color: white; font-family: 'Kanit', sans-serif; text-align: center; }
+        .welcome { padding: 20%; background: rgba(0,0,0,0.8); position: fixed; width: 100%; top:0; cursor: pointer; }
+        .profile-img { width: 150px; border-radius: 50%; border: 2px solid cyan; }
+        .links img { width: 50px; margin: 10px; }
+        @keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+        .content { animation: appear 3s forwards; }
     </style>
 </head>
 <body>
-    <canvas id="space-canvas"></canvas>
 
-    <div id="app">
-        <nav class="navbar">
-            <div>พี่ดำสุดหล่อ</div>
-            <button onclick="toggleSidebar()">เมนู</button>
-        </nav>
+    <div class="welcome" onclick="this.style.display='none'; document.getElementById('myAudio').play();">
+        <h1>ยินดีต้อนรับสู่เว็บของ Noppakao</h1>
+        <p>(คลิกที่นี่เพื่อเข้าสู่เว็บไซต์)</p>
+    </div>
 
-        <div id="profilePage" class="page active">
-            <div class="card">
-                <div class="profile-img"></div>
-                <h2>พี่ดำสุดหล่อ</h2>
-                <p>STATUS: ONLINE</p>
-            </div>
-        </div>
-
-        <div id="loginPage" class="page">
-            <div class="card">
-                <input class="input-box" id="user" placeholder="USERNAME...">
-                <input class="input-box" id="pass" type="password" placeholder="PASSWORD...">
-                <button class="btn" onclick="checkLogin()">LOGIN</button>
-            </div>
+    <div class="content">
+        <img src="https://via.placeholder.com/150" class="profile-img"> <h1>พี่ดำสุดหล่อ</h1>
+        
+        <div class="links">
+            <a href="https://www.facebook.com/share/1BjFiaJCqn/"><img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png"></a>
+            <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"></a>
         </div>
     </div>
 
-    <script>
-        // แก้ไขดึงรูป: เปลี่ยน URL เป็นแบบ Direct Link ที่เบราว์เซอร์อ่านออก
-        // สังเกต: กูเปลี่ยนเป็น noppakao6767.github.io/ชื่อไฟล์.webp
-
-        function checkLogin() {
-            if(document.getElementById('user').value && document.getElementById('pass').value) {
-                alert("เข้าสู่ระบบสำเร็จ!");
-            } else {
-                alert("กรอกข้อมูลให้ครบไอ้หนู");
-            }
-        }
-        
-        // Canvas Starfield (เล็กและลื่น)
-        const cv = document.getElementById("space-canvas");
-        const ctx = cv.getContext("2d");
-        cv.width = window.innerWidth; cv.height = window.innerHeight;
-        function draw() {
-            ctx.fillStyle = "black"; ctx.fillRect(0,0,cv.width, cv.height);
-            ctx.fillStyle = "#00FF66";
-            for(let i=0; i<100; i++) ctx.fillRect(Math.random()*cv.width, Math.random()*cv.height, 2, 2);
-            requestAnimationFrame(draw);
-        }
-        draw();
-    </script>
-</body>
+    <audio id="myAudio" src="joy.mp3"></audio> </body>
 </html>
-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            border-radius: 8px; padding: 14px;
+QBC6VtVm4fcnDvMh5GhciIeDtnStRbfotR3wm+FgsBE/zVH2LLVlQDopHRZi9jYRP1jz93io6rrLxMPiCg6yCv+rhRn1VbLD+i6ywOdhH+5PurLwsdGtl78mHXUhOG9NHSwGKgZ4/ee22rwwWirkckwd1qnqIKkDDd7qCiUlKWbjlQuyuupwdnZ7OaxhpHuaMsJ52Q56UtV5R8HmpDyn8yij8FG+Una56qVWluHynBKpbikqoQTTGRx+BUgFvbtMHH8FGBjCek3hBjAg5oP+ik399qhfgFMUp10vVuLwlxxj886oUm+5xeUVcDhamHZOsxOCoYQ3KMAW4xlyh34OvIot88lActogpR3U1GMUz1IN6U5tfCGVzDo4Md5CkYxl7+IcrGOKbcOB6h2tjgUS0HHQVx5L1PS9pWY7Mb8MRmLtih8TsGKyQmuYNMelJw7qeF6okGjQFoKphXn+kMKKGT9mr9aex3P+Alq0/GAy9qWdqEqAk4yPdfgUvenx1zk2iU6nHpX+TI9+fm4z6UIo/TAv7JzWlD0XNeHvzgSjQmCnYU/YJ7Bw/z4HsheUSGknnpGnCwzu3soL/Z+f+NvAW7VaUpUYPRfremPd682HGPfp/bfPPFrdh/4GDw3JsMMSvvQ/n3+7            border-radius: 8px; padding: 14px;
             margin-top: 8px;
         }
         .fb-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
