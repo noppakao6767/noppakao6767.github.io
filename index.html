@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>พี่ดำสุดหล่อ - Space Profile & Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* รีเซ็ตค่าพื้นฐาน */
         * {
@@ -36,7 +37,7 @@
             pointer-events: none;
         }
 
-        /* --- ปุ่ม 3 ขีด มุมขวาบน (Hamburger Menu) --- */
+        /* --- ปุ่ม 3 ขีด มุมขวาบน --- */
         .menu-toggle {
             position: absolute;
             top: 20px;
@@ -53,7 +54,7 @@
             align-items: center;
             gap: 6px;
             cursor: pointer;
-            z-index: 1010; /* ดันให้อยู่หน้าสุดของหน้าสุด */
+            z-index: 100;
             transition: 0.3s;
         }
         .menu-toggle:hover {
@@ -67,6 +68,15 @@
             border-radius: 2px;
         }
 
+        /* ฉากหลังมืดสลัวตอนเปิดเมนูข้าง (Overlay) */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 998;
+            display: none;
+        }
+
         /* แถบเมนูด้านข้าง (หน้าต่าง 3 ขีด) */
         .sidebar {
             position: fixed;
@@ -74,13 +84,13 @@
             right: -300px;
             width: 300px;
             height: 100%;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(15px);
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
             border-left: 2px solid #00FF66;
             box-shadow: -10px 0 30px rgba(0, 0, 0, 0.9);
-            z-index: 1005; /* ให้ลอยเหนือการ์ดหลัก */
+            z-index: 999;
             transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
-            padding: 100px 30px 30px 30px;
+            padding: 80px 25px 30px 25px;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -88,6 +98,14 @@
         .sidebar.active {
             right: 0;
         }
+        .close-sidebar-btn {
+            position: absolute;
+            top: 20px; left: 20px;
+            color: #ff3333; font-size: 26px; cursor: pointer;
+            transition: 0.2s;
+        }
+        .close-sidebar-btn:hover { transform: scale(1.1); }
+
         .sidebar-btn {
             background: #161616;
             color: #ffffff;
@@ -99,6 +117,9 @@
             cursor: pointer;
             text-align: left;
             transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .sidebar-btn:hover {
             border-color: #00FF66;
@@ -122,23 +143,23 @@
             z-index: 10; 
         }
 
-        /* คืนค่าเอฟเฟกต์รูปโปรไฟล์หมุนสลับสี วิบวับ ส้ม-ม่วง-ฟ้า นีออน ตามรูปเดิมมึงเป๊ะๆ */
+        /* แอนิเมชันไล่เฉดสีรูปโปรไฟล์วิบวับ */
         .profile-img {
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #ff5500, #a855f7, #3b82f6);
-            background-size: 200% 200%;
-            animation: profileGlow 6s linear infinite;
+            background: linear-gradient(45deg, #ff5500, #a855f7, #3b82f6, #ff5500);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
             margin: 0 auto 20px auto;
             border: 3px solid #00FF66;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.7);
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.8);
         }
 
-        @keyframes profileGlow {
-            0% { background-position: 0% 50%; transform: rotate(0deg); }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; transform: rotate(360deg); }
+            100% { background-position: 0% 50%; }
         }
 
         .profile-name {
@@ -186,38 +207,12 @@
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
         }
 
-        .separator-line {
-            border-top: 1px dashed rgba(0, 255, 102, 0.3);
-            margin: 30px 0 20px 0;
-        }
-
-        .section-title {
-            color: #00FF66;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .view-counter {
-            text-align: left;
-            background: rgba(255,255,255,0.03);
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 3px solid #00FF66;
-        }
-        .view-counter span { color: #00FF66; font-size: 20px; font-weight: bold; }
-        #ip-list { text-align: left; max-height: 120px; overflow-y: auto; }
-        .ip-item { color: #00FF66; font-family: monospace; font-size: 14px; padding: 4px 0; word-break: break-all; }
-        .ip-split { border-bottom: 1px solid rgba(0, 255, 102, 0.15); margin: 6px 0; }
-
         /* --- หน้าต่างป๊อปอัป (Modals) --- */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 2000;
             justify-content: center;
             align-items: center;
@@ -240,32 +235,50 @@
         }
         .close-btn:hover { color: #00FF66; }
 
+        .input-group {
+            position: relative;
+            margin: 15px 0;
+            width: 100%;
+        }
         .login-input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 14px 45px 14px 14px;
             background: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 8px;
+            border-radius: 10px;
             color: #fff;
             font-size: 16px;
+            transition: 0.3s;
         }
-        .login-input:focus { border-color: #00FF66; outline: none; }
+        .login-input:focus { border-color: #00FF66; outline: none; box-shadow: 0 0 8px rgba(0,255,102,0.2); }
         
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+            transition: 0.2s;
+            font-size: 18px;
+        }
+        .password-toggle:hover { color: #00FF66; }
+
         .btn-submit {
             background: #00FF66;
             color: #000;
             border: none;
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
             box-shadow: 0 0 10px rgba(0,255,102,0.4);
+            transition: 0.2s;
         }
-        .btn-submit:hover { background: #00cc55; box-shadow: 0 0 15px rgba(0,255,102,0.7); }
+        .btn-submit:hover { background: #00cc55; transform: scale(1.02); }
 
         #game-container {
             display: none;
@@ -291,6 +304,8 @@
 
     <canvas id="space-canvas"></canvas>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="main-card">
         <div class="menu-toggle" id="menuToggleBtn">
             <span></span>
@@ -303,23 +318,52 @@
         <div class="status-connecting">CONNECTING...</div>
         <div class="profile-id">ID: 6767</div>
 
-        <a href="https://facebook.com" target="_blank" class="btn-link">Facebook</a>
-        <a href="https://instagram.com" target="_blank" class="btn-link">Instagram</a>
-
-        <div class="separator-line"></div>
-        <div class="view-counter">ยอดการดูเว็บทั้งหมด: <span id="view-count">...</span> ครั้ง</div>
-        <div class="section-title">🕵️ เลข IP ผู้เข้าชมล่าสุด</div>
-        <div id="ip-list"><div class="ip-item">กำลังดึงข้อมูลระบบ...</div></div>
+        <a href="https://facebook.com" target="_blank" class="btn-link">JO TO</a>
+        <a href="https://instagram.com" target="_blank" class="btn-link">noppakao_1122</a>
     </div>
 
     <div class="sidebar" id="sidebarMenu">
-        <button class="sidebar-btn" id="sideLoginBtn">🔒 เข้าสู่ระบบ / ลงชื่อเข้าใช้</button>
-        <button class="sidebar-btn" id="sideContactBtn">📞 ข้อมูลติดต่อ</button>
+        <span class="close-sidebar-btn" id="closeSidebarX">❌</span>
+        <button class="sidebar-btn" id="sideLoginBtn">🔒 เข้าสู่ระบบเพื่อเล่นเกม</button>
+        <button class="sidebar-btn" id="sideContactBtn">📞 ข้อมูลติดต่อระบบ</button>
     </div>
 
     <div class="modal" id="loginModal">
         <div class="modal-content">
             <span class="close-btn" id="closeLoginBtn">&times;</span>
+            <h2 style="color: #00FF66; margin-bottom: 15px;">🔒 ลงชื่อเข้าใช้ระบบ</h2>
+            
+            <div class="input-group">
+                <input type="text" id="username" class="login-input" placeholder="ชื่อผู้ใช้งาน">
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" class="login-input" placeholder="รหัสผ่าน">
+                <i class="fa-solid fa-eye password-toggle" id="togglePasswordIcon"></i>
+            </div>
+
+            <button class="btn-submit" id="submitLoginBtn">เข้าสู่ระบบ</button>
+        </div>
+    </div>
+
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeContactBtn">&times;</span>
+            <h2 style="color: #00FF66; margin-bottom: 20px;">📞 ข้อมูลติดต่อ</h2>
+            <p style="color:#fff; text-align:left; margin-bottom: 12px; font-size:16px;"><b>Facebook:</b> JO TO</p>
+            <p style="color:#fff; text-align:left; margin-bottom: 12px; font-size:16px;"><b>Instagram:</b> noppakao_1122</p>
+            <p style="color:#fff; text-align:left; margin-bottom: 12px; font-size:16px;"><b>Email:</b> eeh9339@gmail.com</p>
+        </div>
+    </div>
+
+    <div class="modal" id="gameModal">
+        <div id="game-container">
+            <span class="close-btn" id="closeGameBtn">❌ ออกเกม</span>
+            <h2 style="color: #00FF66; margin-bottom: 10px;">🦖 SPACE DINO</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">กด Spacebar หรือ จิ้มหน้าจอเพื่อกระโดดหลบกระบองเพชร</p>
+            <canvas id="gameCanvas" width="500" height="200"></canvas>
+            <div style="color:#00FF66; margin-top:10px; font-weight:bold;">
+="close-btn" id="closeLoginBtn">&times;</span>
             <h2 style="color: #00FF66; margin-bottom: 15px;">🔒 ลงชื่อเข้าใช้เพื่อเล่นเกม</h2>
             <input type="text" id="username" class="login-input" placeholder="ชื่อผู้ใช้งาน">
             <input type="password" id="password" class="login-input" placeholder="รหัสผ่าน">
