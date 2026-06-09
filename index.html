@@ -3,94 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ประวัติการเข้าชม</title>
+    <title>ประวัติการเข้าชมเว็บ</title>
     <style>
-        /* แต่งหน้าเว็บให้เป็นโทนสีดำ-เขียว แบบไซเบอร์ตามรูปของมึง */
+        /* ดึงธีมหน้าเว็บเดิมของมึงกลับมา: พื้นหลังดำ มีเอฟเฟกต์ดาวระยิบระยับ */
         body {
             background-color: #000000;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            box-sizing: border-box;
         }
+
+        /* กล่องมน ๆ สีดำโปร่งแสงแบบเว็บเดิมของมึงเป๊ะ ๆ */
         .container {
-            background-color: #111111;
-            border: 1px solid #222222;
-            border-radius: 20px;
-            padding: 30px;
+            background: rgba(17, 17, 17, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 35px;
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
+        /* ข้อความหัวข้อสีเขียวสว่างตามรูปมึง */
         h2 {
             color: #00FF66;
-            font-size: 22px;
-            margin-top: 0;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 24px;
+            margin: 0 0 8px 0;
+            font-weight: bold;
         }
+
         .subtitle {
             color: #00FF66;
-            font-size: 16px;
-            margin-bottom: 25px;
+            font-size: 18px;
+            margin-bottom: 30px;
         }
-        .view-section {
-            background-color: #1a1a1a;
-            border-radius: 10px;
-            padding: 15px;
+
+        /* ช่องแสดงยอดวิวที่มึงอยากให้เหมือนกันทุกคน */
+        .view-box {
             margin-bottom: 25px;
-            border-left: 4px solid #00FF66;
+            padding: 5px 0;
         }
-        .view-title {
+
+        .view-label {
             color: #888888;
-            font-size: 14px;
-            margin: 0 0 5px 0;
+            font-size: 15px;
+            margin-bottom: 5px;
         }
-        .view-number {
+
+        .view-count-text {
             color: #00FF66;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             margin: 0;
         }
-        .ip-title {
-            color: #888888;
-            font-size: 14px;
+
+        .ip-label {
+            color: #00FF66;
+            font-size: 16px;
             margin-bottom: 15px;
+            font-weight: bold;
         }
-        /* กล่องแสดงรายการ IP */
-        #ip-list {
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 5px;
+
+        /* เส้นแบ่งสไตล์เรียบหรูสีเขียวจาง ๆ แบบรูปแรก */
+        .line-separator {
+            border-bottom: 1px solid rgba(0, 255, 102, 0.2);
+            margin: 12px 0;
         }
-        #ip-list p {
+
+        /* รายการ IP สีเขียวสว่างแยกบรรทัด */
+        .ip-item {
             color: #00FF66;
             font-family: monospace;
-            font-size: 15px;
-            background-color: #161616;
-            padding: 12px;
-            margin: 0 0 10px 0;
-            border-radius: 8px;
-            border: 1px solid #222222;
+            font-size: 16px;
+            padding: 2px 0;
             word-break: break-all;
-        }
-        /* แต่ง Scrollbar ให้สวยเข้ากับธีม */
-        #ip-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        #ip-list::-webkit-scrollbar-track {
-            background: #111111;
-        }
-        #ip-list::-webkit-scrollbar-thumb {
-            background: #333333;
-            border-radius: 10px;
         }
     </style>
 </head>
@@ -100,16 +98,87 @@
         <h2>🕵️ ประวัติการเข้าชม</h2>
         <div class="subtitle">ล่าสุด (แชร์ข้อมูลร่วมกันของทุกคน)</div>
         
-        <div class="view-section">
-            <p class="view-title">ยอดการดูเว็บทั้งหมด</p>
-            <p class="view-number"><span id="view-count">กำลังโหลด...</span> ครั้ง</p>
+        <div class="view-box">
+            <div class="view-label">ยอดการดูเว็บทั้งหมด</div>
+            <div class="view-count-text"><span id="view-count">1</span> ครั้ง</div>
         </div>
 
-        <div class="ip-title">เลข IP ผู้เข้าชมทั้งหมด</div>
+        <div class="ip-label">เลข IP ผู้เข้าชม</div>
+        
         <div id="ip-list">
-            <p>กำลังดึงข้อมูลประวัติ IP...</p>
-        </div>
+            </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            authDomain: "anonymous-2af70.firebaseapp.com",
+            projectId: "anonymous-2af70",
+            storageBucket: "anonymous-2af70.firebasestorage.app",
+            messagingSenderId: "56629997561",
+            appId: "1:56629997561:web:90d1bce34024fd782d728",
+            measurementId: "G-K96C5CY8CC",
+            databaseURL: "https://anonymous-2af70-default-rtdb.firebaseio.com",
+            apiKey: "AIzaSyBZvq_HkJ_U7b-Iw"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const viewCountEl = document.getElementById("view-count");
+        const ipListEl = document.getElementById("ip-list");
+
+        // 1. บันทึก IP ลงฐานข้อมูลกลางร่วมกัน
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                const userIP = data.ip;
+                const ipHistoryRef = ref(db, 'ip_history');
+                push(ipHistoryRef, {
+                    ip: userIP,
+                    timestamp: new Date().toISOString()
+                });
+            })
+            .catch(err => console.error("ดึง IP พัง: ", err));
+
+        // 2. ระบบนับยอดวิวรวมเพิ่มทีละ 1 
+        const totalViewsRef = ref(db, 'total_views');
+        runTransaction(totalViewsRef, (currentValue) => {
+            return (currentValue || 0) + 1;
+        });
+
+        // 3. แสดงผลยอดวิวแบบ Realtime
+        onValue(totalViewsRef, (snapshot) => {
+            const views = snapshot.val() || 1;
+            if(viewCountEl) viewCountEl.innerText = views.toLocaleString();
+        });
+
+        // 4. แสดงผลประวัติ IP ร่วมกันทั้งหมดพร้อมเส้นแบ่ง
+        const ipHistoryRef = ref(db, 'ip_history');
+        onValue(ipHistoryRef, (snapshot) => {
+            if(ipListEl) {
+                ipListEl.innerHTML = ""; 
+                const data = snapshot.val();
+                if(data) {
+                    const entries = Object.values(data).reverse();
+                    entries.forEach((item, index) => {
+                        const div = document.createElement("div");
+                        div.className = "ip-item";
+                        div.innerText = item.ip;
+                        ipListEl.appendChild(div);
+
+                        // ใส่เส้นแบ่งคั่นระหว่าง IP เหมือนเว็บเดิมมึง
+                        if (index < entries.length - 1) {
+                            const line = document.createElement("div");
+                            line.className = "line-separator";
+                            ipListEl.appendChild(line);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
