@@ -3,42 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พี่ดำสุดหล่อ - Link & Dinosaur Game</title>
+    <title>พี่ดำสุดหล่อ - Space Dynamic Profile & Game</title>
     <style>
-        /* ฉากหลังอวกาศมืด มีดาวระยิบระยับแบบเว็บเดิมของมึง */
+        /* รีเซ็ตค่าพื้นฐาน */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
         body {
             background-color: #000000;
-            background-image: 
-                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
-            background-size: 550px 550px, 350px 350px, 250px 250px;
-            background-position: 0 0, 40px 60px, 130px 270px;
             color: #ffffff;
-            font-family: Arial, sans-serif;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
             padding: 20px;
-            box-sizing: border-box;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* การ์ดหลักที่มีขอบเรืองแสงนีออนสีเขียวแบบหน้าเดิมมึงเป๊ะ */
-        .main-card {
+        /* Canvas สำหรับเอฟเฟกต์ดวงดาวอวกาศสมจริง */
+        #space-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* --- ปุ่ม 3 ขีด มุมขวาบน (Hamburger Menu) --- */
+        .menu-toggle {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            width: 45px;
+            height: 45px;
             background: rgba(17, 17, 17, 0.85);
-            backdrop-filter: blur(10px);
             border: 2px solid #00FF66;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: 0.3s;
+        }
+        .menu-toggle:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.8);
+            transform: scale(1.05);
+        }
+        .menu-toggle span {
+            width: 24px;
+            height: 3px;
+            background-color: #00FF66;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        /* แถบเมนูด้านข้างที่จะสไลด์ออกมา */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(15px);
+            border-left: 2px solid #00FF66;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.9);
+            z-index: 999;
+            transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+            padding: 100px 30px 30px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .sidebar.active {
+            right: 0;
+        }
+        .sidebar-btn {
+            background: #161616;
+            color: #ffffff;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-btn:hover {
+            border-color: #00FF66;
+            background: #222;
+            color: #00FF66;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+        }
+
+        /* --- การ์ดโปรไฟล์หลัก --- */
+        .main-card {
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(12px);
+            border: 2px solid #00FF66;
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.4);
             border-radius: 30px;
-            padding: 35px 25px;
+            padding: 40px 25px;
             width: 100%;
             max-width: 380px;
             text-align: center;
             position: relative;
+            z-index: 10;
         }
 
+        /* รูปโปรไฟล์แบบไล่เฉดสีเดิมอัพเกรดความเรืองแสง */
         .profile-img {
             width: 150px;
             height: 150px;
@@ -46,7 +134,7 @@
             background: linear-gradient(135deg, #a855f7, #3b82f6);
             margin: 0 auto 20px auto;
             border: 3px solid #00FF66;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.7);
         }
 
         .profile-name {
@@ -54,7 +142,7 @@
             font-size: 32px;
             font-weight: bold;
             margin: 0 0 10px 0;
-            text-shadow: 0 0 10px rgba(0, 255, 102, 0.8);
+            text-shadow: 0 0 12px rgba(0, 255, 102, 0.8);
         }
 
         .status-connecting {
@@ -72,7 +160,7 @@
             margin-bottom: 25px;
         }
 
-        /* ปุ่มกดโซเชียลมีเดีย */
+        /* ปุ่มลิงก์โซเชียล */
         .btn-link {
             display: block;
             background-color: #161616;
@@ -86,6 +174,7 @@
             border: 1px solid #222222;
             transition: 0.3s;
             cursor: pointer;
+            text-align: center;
         }
         .btn-link:hover {
             background-color: #222222;
@@ -93,93 +182,12 @@
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
         }
 
-        /* ปุ่ม Login เล่นเกมสีเขียวนีออนเด่น ๆ */
-        .btn-login {
-            background-color: #00FF66;
-            color: #000000;
-            border: none;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
-        }
-        .btn-login:hover {
-            background-color: #00cc55;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
-        }
-
-        /* ระบบหน้าต่าง Pop-up (Modal) สำหรับ Login และ เล่นเกม */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background: #111111;
-            border: 2px solid #00FF66;
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
-            position: relative;
-        }
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 20px;
-            color: #888; font-size: 24px; cursor: pointer;
-        }
-        .close-btn:hover { color: #00FF66; }
-
-        /* ฟอร์มกรอก Login */
-        .login-input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        .login-input:focus {
-            border-color: #00FF66;
-            outline: none;
-        }
-
-        /* สไตล์หน้าต่างเกมไดโนเสาร์ */
-        #game-container {
-            display: none;
-            width: 100%;
-            max-width: 600px;
-            background: #111;
-            border: 2px solid #00FF66;
-            border-radius: 20px;
-            padding: 20px;
-            position: relative;
-        }
-        #gameCanvas {
-            background: #161616;
-            border-radius: 10px;
-            display: block;
-            margin: 0 auto;
-            border-bottom: 3px solid #00FF66;
-            max-width: 100%;
-        }
-        .game-info {
-            color: #00FF66;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        /* ระบบดึงข้อมูลเดิมด้านล่าง */
+        /* เส้นแบ่ง */
         .separator-line {
             border-top: 1px dashed rgba(0, 255, 102, 0.3);
             margin: 30px 0 20px 0;
         }
+
         .section-title {
             color: #00FF66;
             font-size: 16px;
@@ -187,6 +195,7 @@
             margin-bottom: 15px;
             text-align: left;
         }
+
         .view-counter {
             text-align: left;
             background: rgba(255,255,255,0.03);
@@ -199,82 +208,42 @@
         #ip-list { text-align: left; max-height: 120px; overflow-y: auto; }
         .ip-item { color: #00FF66; font-family: monospace; font-size: 14px; padding: 4px 0; word-break: break-all; }
         .ip-split { border-bottom: 1px solid rgba(0, 255, 102, 0.15); margin: 6px 0; }
-    </style>
-</head>
-<body>
 
-    <div class="main-card" id="home-page">
-        <div class="profile-img"></div>
-        <div class="profile-name">พี่ดำสุดหล่อ</div>
-        <div class="status-connecting">CONNECTING...</div>
-        <div class="profile-id">ID: 6767</div>
+        /* --- ระบบ Pop-up Windows (Modals) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #111111;
+            border: 2px solid #00FF66;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.4);
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            color: #888; font-size: 24px; cursor: pointer;
+        }
+        .close-btn:hover { color: #00FF66; }
 
-        <button class="btn-link btn-login" onclick="openLoginModal()">🎮 เข้าสู่ระบบเล่นเกม 🦖</button>
-
-        <a href="https://facebook.com" target="_blank" class="btn-link">Facebook</a>
-        <a href="https://instagram.com" target="_blank" class="btn-link">Instagram</a>
-
-        <div class="separator-line"></div>
-        <div class="view-counter">ยอดการดูเว็บทั้งหมด: <span id="view-count">...</span> ครั้ง</div>
-        <div class="section-title">🕵️ เลข IP ผู้เข้าชมล่าสุด</div>
-        <div id="ip-list"><div class="ip-item">กำลังดึงข้อมูลระบบ...</div></div>
-    </div>
-
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeLoginModal()">&times;</span>
-            <h2 style="color: #00FF66; margin-bottom: 20px;">🔒 LOGIN</h2>
-            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">(ตั้งไอดีอะไรก็ได้เพื่อเข้าเล่นเกม)</p>
-            <input type="text" id="username" class="login-input" placeholder="ชื่อผู้ใช้งาน / Username">
-            <input type="password" id="password" class="login-input" placeholder="รหัสผ่าน / Password">
-            <button class="btn-link btn-login" style="width:100%; margin-top:15px;" onclick="checkLogin()">ตกลง เข้าสู่ระบบ</button>
-        </div>
-    </div>
-
-    <div class="modal" id="gameModal">
-        <div id="game-container">
-            <span class="close-btn" onclick="closeGameModal()" style="color:#fff;">❌ ออกเกม</span>
-            <h2 style="color: #00FF66; margin-bottom: 10px;">🦖 DINO RUNNER</h2>
-            <p style="color: #888; font-size: 13px; margin: 0 0 15px 0;">กด Spacebar บนคอม หรือ จิ้มหน้าจอมือถือ เพื่อกระโดด</p>
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border: 1px solid #3
             
-            <canvas id="gameCanvas" width="550" height="200"></canvas>
-            
-            <div class="game-info">
-                คะแนนปัจจุบัน: <span id="score">0</span> | คะแนนสูงสุด: <span id="high-score">0</span>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, runTransaction, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            authDomain: "anonymous-2af70.firebaseapp.com",
-            projectId: "anonymous-2af70",
-            storageBucket: "anonymous-2af70.firebasestorage.app",
-            messagingSenderId: "56629997561",
-            appId: "1:56629997561:web:90d1bce34024fd782d728",
-            measurementId: "G-K96C5CY8CC",
-            databaseURL: "https://anonymous-2af70-default-rtdb.firebaseio.com",
-            apiKey: "AIzaSyBZvq_HkJ_U7b-Iw"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        const viewCountEl = document.getElementById("view-count");
-        const ipListEl = document.getElementById("ip-list");
-
-        // 1. ดึง IP มาตรวจสอบและเซฟลง Firebase
-        fetch('https://api.ipify.org?format=json')
-            .then(response => response.json())
-            .then(async (data) => {
-                const userIP = data.ip;
-                const ipHistoryRef = ref(db, 'ip_history');
-                const lastIpQuery = query(ipHistoryRef, limitToLast(1));
-                const snapshot = await get(lastIpQuery);
-                
                 let lastRecordedIp = "";
                 if (snapshot.exists() && snapshot.val()) {
                     const val = snapshot.val();
