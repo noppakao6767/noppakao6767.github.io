@@ -4,346 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>พี่ดำสุดหล่อ - Space Mission Control</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', Courier, monospace, 'Segoe UI', Tahoma;
-            -webkit-tap-highlight-color: transparent; /* ลบแถบไฮไลต์สีฟ้าเวลากดบนมือถือ */
-        }
+        /* CSS ทั้งหมดของมึง */
+        body { margin: 0; background: #020208; color: #00FF66; font-family: monospace; overflow-x: hidden; }
+        #space-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .navbar { position: fixed; top: 0; width: 100%; background: #050515; border-bottom: 2px solid #00FF66; padding: 15px; display: flex; justify-content: space-between; z-index: 9999; }
+        .main-wrapper { position: relative; z-index: 10; padding-top: 100px; text-align: center; }
+        .page-content { display: none; }
+        .active-page { display: block; }
+        #gameCanvas { background: #050510; border: 2px solid #00FF66; cursor: crosshair; }
+    </style>
+</head>
+<body>
+    <canvas id="space-canvas"></canvas>
+    
+    <nav class="navbar">
+        <div class="nav-logo">พี่ดำสุดหล่อ Terminal</div>
+        <button id="openSidebarBtn">เมนู</button>
+    </nav>
 
-        body {
-            background-color: #020208;
-            color: #00FF66; /* ฟอนต์เขียวนีออนสไตล์ Terminal */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            position: relative;
-        }
+    <div class="main-wrapper">
+        <div id="profilePage" class="page-content active-page">
+            <div class="profile-card">
+                <h1>พี่ดำสุดหล่อ</h1>
+                <p>STATUS: ONLINE</p>
+            </div>
+        </div>
 
-        /* ฉากหลังดวงดาวอวกาศไหล */
-        #space-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
+        <div id="gamePage" class="page-content">
+            <canvas id="gameCanvas" width="360" height="500"></canvas>
+            <div id="scoreDisplay">SCORE: 0</div>
+        </div>
+    </div>
 
-        /* เมนูบาร์ด้านบน - FIXED ลอยตามติดหน้าจอ */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(5, 5, 15, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 2px solid #00FF66;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 9999; /* อยู่เหนือสุด */
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
-        }
-
-        .nav-logo {
-            font-size: 18px;
-            font-weight: bold;
-            color: #00FF66;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
-        }
-
-        /* ปุ่ม 3 ขีด - มั่นใจได้ว่าไม่มีอะไรบัง จิ้มง่าย */
-        .nav-menu-btn {
-            background: rgba(0, 255, 102, 0.15);
-            color: #00FF66;
-            border: 2px solid #00FF66;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
-            position: relative;
-            z-index: 10000;
-        }
-        .nav-menu-btn:hover { 
-            background: #00FF66; 
-            color: #000;
-        }
-
-        /* หน้าต่างสไลด์เมนูด้านข้าง (Sidebar) */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 19999;
-            display: none;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0; 
-            right: -310px; /* ซ่อนหลบไว้ข้างจอ */
-            width: 290px; 
-            height: 100%;
-            background: rgba(5, 5, 20, 0.98);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-left: 2px solid #00FF66;
-            z-index: 20000;
-            transition: right 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-            padding: 80px 20px 20px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+    <script>
+        // 1. ฉากหลัง + ดาวตก
+        const canvas = document.getElementById("space-canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         
-        /* สไลด์เมนูออกมาเมื่อถูกเรียก */
-        .sidebar.active { 
-            right: 0 !important; 
+        function animateSpace() {
+            ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.fillRect(0,0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            if(Math.random() < 0.1) ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
+            requestAnimationFrame(animateSpace);
         }
-        
-        .close-sidebar {
-            position: absolute;
-            top: 20px; left: 20px;
-            color: #ff3333; font-size: 24px; cursor: pointer;
-        }
+        animateSpace();
 
-        .sidebar-link {
-            background: rgba(0, 255, 102, 0.05);
-            color: #00FF66;
-            border: 1px solid rgba(0, 255, 102, 0.4);
-            padding: 14px 15px;
-            border-radius: 8px;
-            text-align: left;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .sidebar-link:hover { background: rgba(0, 255, 102, 0.2); }
+        // 2. เกมยานยิง
+        const gCanvas = document.getElementById("gameCanvas");
+        const gCtx = gCanvas.getContext("2d");
+        let player = {x: 160, y: 400}, bullets = [], meteors = [], score = 0;
 
-        /* แกนกลางจัดหน้าจอ */
-        .main-wrapper {
-            flex: 1;
-            width: 100%;
-            max-width: 460px;
-            padding: 110px 20px 40px 20px;
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        function gameLoop() {
+            gCtx.clearRect(0,0, 360, 500);
+            gCtx.fillStyle = "blue"; gCtx.fillRect(player.x, player.y, 40, 40);
+            
+            if(Math.random() < 0.05) meteors.push({x: Math.random()*340, y: -40});
+            meteors.forEach((m, i) => {
+                m.y += 3;
+                gCtx.fillStyle = "red"; gCtx.fillRect(m.x, m.y, 30, 30);
+                if(m.y > 500) location.reload();
+            });
 
-        /* คลาสสลับหน้าเว็บแบบเด็ดขาด */
-        .page-content {
-            display: none !important;
+            bullets.forEach((b, i) => {
+                b.y -= 10;
+                gCtx.fillStyle = "yellow"; gCtx.fillRect(b.x, b.y, 5, 10);
+                meteors.forEach((m, mi) => {
+                    if(b.x > m.x && b.x < m.x+30 && b.y < m.y+30) {
+                        meteors.splice(mi, 1); bullets.splice(i, 1); score += 10;
+                        document.getElementById("scoreDisplay").innerText = "SCORE: " + score;
+                    }
+                });
+            });
+            requestAnimationFrame(gameLoop);
         }
-        .page-content.active-page {
-            display: block !important;
-        }
+        gameLoop();
 
-        /* การ์ดโปรไฟล์หน้าแรก */
-        .profile-card {
-            background: rgba(10, 10, 25, 0.75);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 2px solid #00FF66;
-            border-radius: 24px;
-            padding: 45px 25px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
-        }
-
-        .profile-avatar {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00FF66, #00bcff);
-            margin: 0 auto 25px auto;
-            border: 2px solid #00FF66;
-            box-shadow: 0 0 25px rgba(0, 255, 102, 0.5);
-        }
-
-        .profile-title {
-            font-size: 30px;
-            font-weight: bold;
-            color: #00FF66;
-            margin-bottom: 8px;
-        }
-
-        .profile-subtitle {
-            font-size: 14px;
-            color: #88c999;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-
-        /* สไตล์กล่องล็อกอินและหน้าเกม */
-        .page-container {
-            background: rgba(5, 5, 20, 0.9);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 2px solid #00FF66;
-            border-radius: 20px;
-            padding: 35px 25px;
-            text-align: center;
-            box-shadow: 0 0 35px rgba(0, 255, 102, 0.3);
-        }
-
-        .page-container h2 {
-            color: #00FF66;
-            font-size: 22px;
-            margin-bottom: 25px;
-            font-weight: bold;
-        }
-
-        .input-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .input-box input {
-            width: 100%;
-            padding: 14px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid #00FF66;
-            border-radius: 10px;
-            color: #00FF66;
-            font-size: 16px;
-        }
-
-        .submit-btn {
-            width: 100%;
-            background: rgba(0, 255, 102, 0.15);
-            color: #00FF66;
-            border: 2px solid #00FF66;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .submit-btn:hover { background: #00FF66; color: #000; }
-
-        /* ปุ่ม Social Login */
-        .social-login-group {
-            margin-top: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            border-top: 1px dashed rgba(0, 255, 102, 0.3);
-            padding-top: 20px;
-        }
-
-        .btn-social {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: 0.2s;
-            border: none;
-        }
-
-        .btn-google {
-            background-color: #ffffff;
-            color: #000000;
-        }
-        .btn-google:hover { background-color: #e6e6e6; }
-
-        .btn-facebook {
-            background-color: #1877F2;
-            color: #ffffff;
-        }
-        .btn-facebook:hover { background-color: #145dbf; }
-
-        #gameCanvas {
-            background: #050510;
-            border-radius: 10px;
-            display: block;
-            margin: 15px auto;
-            border-bottom: 3px solid #00FF66;
-            max-width: 100%;
-        }
-
-        /* ฟุตเตอร์ท้ายเว็บ */
-        .footer-section {
-            width: 100%;
-            background: rgba(5, 5, 15, 0.95);
-            border-top: 2px solid #00FF66;
-            padding: 40px 20px;
-            position: relative;
-            z-index: 10;
-            margin-top: auto;
-        }
-
-        .footer-container {
-            width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 30px;
-        }
-
-        .footer-box h3 {
-            color: #00FF66;
-            font-size: 18px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid rgba(0, 255, 102, 0.4);
-            padding-bottom: 6px;
-            display: inline-block;
-        }
-
-        .footer-links { list-style: none; }
-        .footer-links li {
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #88c999;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .fake-fb-page {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            border: 1px solid rgba(0, 255, 102, 0.3);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .fb-header { display: flex; align-items: center; gap: 10px; }
+        window.onmousemove = (e) => player.x = e.clientX - 20;
+        window.onclick = () => bullets.push({x: player.x+18, y: player.y});
+    </script>
+</body>
+</html>
+eader { display: flex; align-items: center; gap: 10px; }
         .fb-logo-avatar {
             width: 42px; height: 42px;
             background-color: #1d1b3a;
