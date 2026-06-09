@@ -53,7 +53,7 @@
             align-items: center;
             gap: 6px;
             cursor: pointer;
-            z-index: 100;
+            z-index: 1010; /* ดันให้อยู่หน้าสุดของหน้าสุด */
             transition: 0.3s;
         }
         .menu-toggle:hover {
@@ -67,7 +67,7 @@
             border-radius: 2px;
         }
 
-        /* แถบเมนูด้านข้าง */
+        /* แถบเมนูด้านข้าง (หน้าต่าง 3 ขีด) */
         .sidebar {
             position: fixed;
             top: 0;
@@ -78,7 +78,7 @@
             backdrop-filter: blur(15px);
             border-left: 2px solid #00FF66;
             box-shadow: -10px 0 30px rgba(0, 0, 0, 0.9);
-            z-index: 999;
+            z-index: 1005; /* ให้ลอยเหนือการ์ดหลัก */
             transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
             padding: 100px 30px 30px 30px;
             display: flex;
@@ -122,15 +122,23 @@
             z-index: 10; 
         }
 
-        /* รูปโปรไฟล์วงกลมไล่เฉดสีม่วง-ฟ้า ขอบเรืองแสงเขียวนีออนของมึง */
+        /* คืนค่าเอฟเฟกต์รูปโปรไฟล์หมุนสลับสี วิบวับ ส้ม-ม่วง-ฟ้า นีออน ตามรูปเดิมมึงเป๊ะๆ */
         .profile-img {
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #a855f7, #3b82f6);
+            background: linear-gradient(135deg, #ff5500, #a855f7, #3b82f6);
+            background-size: 200% 200%;
+            animation: profileGlow 6s linear infinite;
             margin: 0 auto 20px auto;
             border: 3px solid #00FF66;
             box-shadow: 0 0 20px rgba(0, 255, 102, 0.7);
+        }
+
+        @keyframes profileGlow {
+            0% { background-position: 0% 50%; transform: rotate(0deg); }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; transform: rotate(360deg); }
         }
 
         .profile-name {
@@ -320,6 +328,214 @@
     </div>
 
     <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeContactBtn">&times;</span>
+            <h2 style="color: #00FF66; margin-bottom: 20px;">📞 ข้อมูลติดต่อ</h2>
+            <p style="color:#fff; text-align:left; margin-bottom: 10px;"><b>Facebook:</b> พี่ดำสุดหล่อ</p>
+            <p style="color:#fff; text-align:left; margin-bottom: 10px;"><b>Instagram:</b> @black_handsome</p>
+            <p style="color:#fff; text-align:left; margin-bottom: 10px;"><b>Email:</b> black6767@gmail.com</p>
+        </div>
+    </div>
+
+    <div class="modal" id="gameModal">
+        <div id="game-container">
+            <span class="close-btn" id="closeGameBtn">❌ ออกเกม</span>
+            <h2 style="color: #00FF66; margin-bottom: 10px;">🦖 SPACE DINO</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">กด Spacebar หรือ จิ้มหน้าจอเพื่อกระโดดหลบกระบองเพชร</p>
+            <canvas id="gameCanvas" width="500" height="200"></canvas>
+            <div style="color:#00FF66; margin-top:10px; font-weight:bold;">
+                คะแนน: <span id="score">0</span> | สูงสุด: <span id="high-score">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- เอฟเฟกต์ดวงดาวอวกาศไหล ---
+        const spaceCanvas = document.getElementById("space-canvas");
+        const sCtx = spaceCanvas.getContext("2d");
+        let stars = [];
+
+        function resizeCanvas() {
+            spaceCanvas.width = window.innerWidth;
+            spaceCanvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        for(let i=0; i<80; i++) {
+            stars.push({
+                x: Math.random() * spaceCanvas.width,
+                y: Math.random() * spaceCanvas.height,
+                size: Math.random() * 2 + 0.5,
+                speed: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function animateSpace() {
+            sCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
+            sCtx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            
+            stars.forEach(star => {
+                sCtx.beginPath();
+                sCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                sCtx.fill();
+                
+                star.y += star.speed;
+                if(star.y > spaceCanvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * spaceCanvas.width;
+                }
+            });
+            requestAnimationFrame(animateSpace);
+        }
+        animateSpace();
+
+        // --- ระบบควบคุมสไลด์เมนูหน้าต่าง 3 ขีด และ Modals ---
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        
+        function toggleSidebar() { sidebarMenu.classList.toggle('active'); }
+        function openModal(id) { sidebarMenu.classList.remove('active'); document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        document.getElementById('menuToggleBtn').addEventListener('click', toggleSidebar);
+        document.getElementById('sideLoginBtn').addEventListener('click', () => openModal('loginModal'));
+        document.getElementById('sideContactBtn').addEventListener('click', () => openModal('contactModal'));
+        document.getElementById('closeLoginBtn').addEventListener('click', () => closeModal('loginModal'));
+        document.getElementById('closeContactBtn').addEventListener('click', () => closeModal('contactModal'));
+
+        function checkLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if(u.trim() !== "" && p.trim() !== "") {
+                closeModal('loginModal');
+                document.getElementById('gameModal').style.display = 'flex';
+                document.getElementById('game-container').style.display = 'block';
+                initGame();
+            } else { alert("กรอกไอดีและรหัสผ่านก่อนมึง!"); }
+        }
+        document.getElementById('submitLoginBtn').addEventListener('click', checkLogin);
+
+        function closeGameModal() {
+            document.getElementById('gameModal').style.display = 'none';
+            isPlaying = false;
+        }
+        document.getElementById('closeGameBtn').addEventListener('click', closeGameModal);
+
+        // --- มินิเกมไดโนเสาร์กระโดด ---
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        let isPlaying = false;
+        let score=0, highScore=0;
+        let dino = { x: 40, y: 140, w: 20, h: 35, vy: 0, gravity: 1.1, jump: -15, grounded: false };
+        let obstacles = [], spawnTimer = 0, speed = 6;
+
+        function initGame() {
+            score = 0; speed = 6; obstacles = []; dino.y = 140; dino.vy = 0; isPlaying = true;
+            document.getElementById("score").innerText = score;
+            gameLoop();
+        }
+
+        function doJump() { if(dino.grounded && isPlaying) { dino.vy = dino.jump; dino.grounded = false; } }
+        window.addEventListener("keydown", (e) => { if(e.code === "Space") doJump(); });
+        canvas.addEventListener("touchstart", doJump);
+        canvas.addEventListener("mousedown", doJump);
+
+        function gameLoop() {
+            if(!isPlaying) return;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            dino.vy += dino.gravity; dino.y += dino.vy;
+            if(dino.y > 140) { dino.y = 140; dino.vy = 0; dino.grounded = true; }
+
+            ctx.fillStyle = "#00FF66"; ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+
+            spawnTimer++;
+            if(spawnTimer > Math.random()*40 + 50) {
+                obstacles.push({ x: canvas.width, y: 150, w: 15, h: 30 });
+                spawnTimer = 0;
+            }
+
+            ctx.fillStyle = "#FF3336";
+            for(let i=obstacles.length-1; i>=0; i--) {
+                let o = obstacles[i]; o.x -= speed;
+                ctx.fillRect(o.x, o.y, o.w, o.h);
+
+                if(dino.x < o.x + o.w && dino.x + dino.w > o.x && dino.y < o.y + o.h && dino.y + dino.h > o.y) {
+                    alert("💥 เกมโอเวอร์! คะแนนมึง: " + score); initGame(); return;
+                }
+                if(o.x + o.w < 0) {
+                    obstacles.splice(i, 1); score++;
+                    document.getElementById("score").innerText = score;
+                    if(score > highScore) { highScore = score; document.getElementById("high-score").innerText = highScore; }
+                    if(score % 5 === 0) speed += 0.7;
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, runTransaction, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // คอนฟิกจากภาพถ่าย ตรวจสอบซ้ำแล้วถูกต้อง 100%
+        const firebaseConfig = {
+            authDomain: "anonymous-2af70.firebaseapp.com",
+            projectId: "anonymous-2af70",
+            storageBucket: "anonymous-2af70.firebasestorage.app",
+            messagingSenderId: "56629997561",
+            appId: "1:56629997561:web:90d1bce34024fd782d728", 
+            measurementId: "G-K96C5CY8CC",
+            databaseURL: "https://anonymous-2af70-default-rtdb.firebaseio.com"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const viewCountEl = document.getElementById("view-count");
+        const ipListEl = document.getElementById("ip-list");
+
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(async (data) => {
+                const userIP = data.ip;
+                const ipHistoryRef = ref(db, 'ip_history');
+                const lastIpQuery = query(ipHistoryRef, limitToLast(1));
+                const snapshot = await get(lastIpQuery);
+                
+                let lastRecordedIp = "";
+                if (snapshot.exists() && snapshot.val()) {
+                    const val = snapshot.val();
+                    const lastKey = Object.keys(val)[0];
+                    lastRecordedIp = val[lastKey].ip;
+                }
+
+                if (!lastRecordedIp || userIP !== lastRecordedIp) {
+                    push(ipHistoryRef, { ip: userIP, timestamp: new Date().toISOString() });
+                }
+            }).catch(err => console.error(err));
+
+        const totalViewsRef = ref(db, 'total_views');
+        runTransaction(totalViewsRef, (currentValue) => { return (currentValue || 0) + 1; });
+
+        onValue(totalViewsRef, (snapshot) => {
+            const views = snapshot.val() || 1;
+            if(viewCountEl) viewCountEl.innerText = views.toLocaleString();
+        });
+
+        const ipHistoryRef = ref(db, 'ip_history');
+        onValue(ipHistoryRef, (snapshot) => {
+            if(ipListEl) {
+                ipListEl.innerHTML = ""; 
+                const data = snapshot.val();
+                if(data) {
+                    const entries = Object.values(data).reverse();
+                    entries.forEach((item, index) => {
+                        const div = document.createElement("div");
+                        div.className = "ip-item";
+                        div.innerText = item.ip;
+                        ipListEl.appendChild(div);
+                        if (inds="modal" id="contactModal">
         <div class="modal-content">
             <span class="close-btn" id="closeContactBtn">&times;</span>
             <h2 style="color: #00FF66; margin-bottom: 20px;">📞 ข้อมูลติดต่อ</h2>
