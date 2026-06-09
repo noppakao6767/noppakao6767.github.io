@@ -2,76 +2,81 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Noppakao System</title>
     <style>
-        body { 
-            background: #000; 
-            color: #00FF66; 
-            font-family: 'Courier New', monospace; 
-            margin: 0; 
-            overflow: hidden; /* ป้องกันแถบเลื่อนเมื่อดาวตกวิ่งออกนอกจอ */
-            height: 100vh;
-        }
-
-        /* เมนูส่วนกลาง */
-        .header-menu { 
-            position: absolute; 
-            top: 20px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            display: flex; 
-            gap: 20px; 
-            align-items: center; 
-            z-index: 100; 
-        }
+        body { background: #000; color: #00FF66; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; }
         
+        /* การตั้งค่าหน้าจอ */
+        .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #game-page { display: none; background: #000; }
+
+        /* หน้าหลัก */
+        .header-menu { position: absolute; top: 20px; display: flex; gap: 20px; z-index: 100; }
         .social-icon { width: 35px; cursor: pointer; transition: 0.3s; filter: drop-shadow(0 0 5px #00FF66); }
-        .social-icon:hover { transform: scale(1.2); }
-        
-        .game-btn { 
-            background: #ff0000; 
-            color: #fff; 
-            padding: 10px 20px; 
-            border-radius: 5px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            text-decoration: none; 
-            border: 1px solid #fff;
-        }
-
-        /* ส่วนกลาง */
-        .main { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .box { border: 2px solid #00FF66; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 0 20px #00FF66; background: rgba(0,0,0,0.8); z-index: 10; }
+        .game-btn { background: #ff0000; color: #fff; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; text-decoration: none; border: 1px solid #fff; }
+        .box { border: 2px solid #00FF66; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 0 20px #00FF66; background: rgba(0,0,0,0.8); }
         .profile-img { width: 150px; border-radius: 50%; border: 3px solid #00FF66; margin-bottom: 15px; }
+
+        /* หน้าเกม */
+        iframe { width: 95%; height: 70%; border: 2px solid #00FF66; border-radius: 10px; background: #fff; }
+        .back-btn { margin-top: 15px; color: #00FF66; cursor: pointer; text-decoration: underline; font-size: 18px; }
 
         /* เอฟเฟกต์ดาวตก */
         .meteor { position: absolute; background: white; width: 2px; height: 10px; opacity: 0.7; animation: fall linear infinite; }
-        @keyframes fall {
-            0% { transform: translateY(-100px) rotate(45deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(45deg); opacity: 0; }
-        }
+        @keyframes fall { 0% { transform: translateY(-100px) rotate(45deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(45deg); opacity: 0; } }
     </style>
 </head>
 <body>
 
     <div class="meteor" style="top: -10px; left: 10%; animation-duration: 2s;"></div>
     <div class="meteor" style="top: -50px; left: 40%; animation-duration: 3s;"></div>
-    <div class="meteor" style="top: -20px; left: 70%; animation-duration: 2.5s;"></div>
-    <div class="meteor" style="top: -80px; left: 90%; animation-duration: 4s;"></div>
 
-    <div class="header-menu">
-        <a href="https://www.facebook.com/share/1BjFiaJCqn/"><img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png" class="social-icon"></a>
-        <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" class="social-icon"></a>
-        <a href="game.html" class="game-btn">กดเพื่อเล่นเกมจอยไดโนเสาร์</a>
-    </div>
-
-    <div class="main">
+    <div id="home-page" class="page">
+        <div class="header-menu">
+            <a href="https://www.facebook.com/share/1BjFiaJCqn/"><img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png" class="social-icon"></a>
+            <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" class="social-icon"></a>
+        </div>
         <div class="box">
             <img src="IMG_20260419_061914_854.webp" class="profile-img">
             <h1>พี่ดำสุดหล่อ</h1>
-            <p>SYSTEM ONLINE</p>
+            <button class="game-btn" onclick="showGame()">กดเพื่อเล่นเกมจอยไดโนเสาร์</button>
         </div>
     </div>
 
+    <div id="game-page" class="page">
+        <h2 style="margin: 0 0 10px 0;">เกมไดโนเสาร์กระโดด (โหมดจอย)</h2>
+        <iframe src="https://chromedino.com/" frameborder="0"></iframe>
+        <div class="back-btn" onclick="showHome()">กลับหน้าหลัก</div>
+    </div>
+
+    <audio id="jump-sound" src="joy.mp3"></audio>
+
+    <script>
+        const sound = document.getElementById('jump-sound');
+        
+        function showGame() {
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('game-page').style.display = 'flex';
+        }
+        function showHome() {
+            document.getElementById('home-page').style.display = 'flex';
+            document.getElementById('game-page').style.display = 'none';
+        }
+
+        // ระบบเสียง: เมื่อมีการกดปุ่ม (กระโดด) ในหน้าเกม ให้เล่นเสียง
+        // หมายเหตุ: เบราว์เซอร์ต้องมีการแตะหน้าจอก่อนครั้งนึงถึงจะอนุญาตให้เล่นเสียงได้
+        window.addEventListener('keydown', (e) => { 
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                sound.currentTime = 0;
+                sound.play(); 
+            }
+        });
+        
+        window.addEventListener('touchstart', () => { 
+            sound.currentTime = 0;
+            sound.play(); 
+        });
+    </script>
 </body>
 </html>
