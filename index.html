@@ -1,371 +1,66 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>มายเนมอิท</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        body {
-            background: #050508;
-            color: #fff;
-            overflow-x: hidden;
-            position: relative;
-        }
+  // โค้ดของมึงที่กูประกอบร่างให้เสร็จแล้ว
+  const firebaseConfig = {
+    authDomain: "anonymous-2af70.firebaseapp.com",
+    projectId: "anonymous-2af70",
+    storageBucket: "anonymous-2af70.firebasestorage.app",
+    messagingSenderId: "56629997561",
+    appId: "1:56629997561:web:90d1bce34024fd782d728",
+    measurementId: "G-K96C5CY8CC",
+    databaseURL: "https://anonymous-2af70-default-rtdb.firebaseio.com",
+    apiKey: "AIzaSyBZvq_HkJ_U7b-Iw" // กูเติมอันที่แหว่งไปคืนให้
+  };
 
-        #space-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
+  // เริ่มต้นทำงานกับระบบฐานข้อมูล
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-        .hero {
-            height: 100vh;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-        }
+  const viewCountEl = document.getElementById("view-count"); 
+  const ipListEl = document.getElementById("ip-list");       
 
-        .profile {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            background: rgba(10, 15, 15, 0.65);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding: 35px;
-            border-radius: 25px;
-            border: 2px solid #00ff66;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 0 30px rgba(0, 255, 102, 0.2);
-        }
+  // ดึง IP คนเข้าเว็บแล้วส่งไปเก็บที่ Firebase
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      const userIP = data.ip;
+      const ipHistoryRef = ref(db, 'ip_history');
+      push(ipHistoryRef, {
+        ip: userIP,
+        timestamp: new Date().toISOString()
+      });
+    })
+    .catch(err => console.error("ดึง IP พัง: ", err));
 
-        .avatar {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 4px solid #00ff66;
-            object-fit: cover;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
-        }
+  // สั่งนับยอดวิวบวกรวมเพิ่มขึ้นทีละ 1 ของทุกคน
+  const totalViewsRef = ref(db, 'total_views');
+  runTransaction(totalViewsRef, (currentValue) => {
+    return (currentValue || 0) + 1;
+  });
 
-        h1 {
-            font-size: 42px;
-            margin-bottom: 10px;
-            color: #fff;
-            text-shadow: 0 0 10px #00ff66;
-        }
+  // ดึงยอดวิวจาก Firebase มาโชว์บนหน้าจอแบบ Realtime
+  onValue(totalViewsRef, (snapshot) => {
+    const views = snapshot.val() || 0;
+    if(viewCountEl) viewCountEl.innerText = views; 
+  });
 
-        #typing {
-            font-size: 18px;
-            color: #00ff66;
-            min-height: 27px;
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
-        }
-
-        .tag {
-            color: #bdbdbd;
-            font-size: 16px;
-            margin-bottom: 25px;
-        }
-
-        .btns a {
-            display: inline-block;
-            padding: 12px 24px;
-            margin: 5px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: .3s;
-            font-weight: bold;
-        }
-
-        .btns a:hover {
-            background: #00ff66;
-            color: #000;
-            box-shadow: 0 0 15px #00ff66;
-            transform: translateY(-2px);
-        }
-
-        section {
-            max-width: 1000px;
-            margin: auto;
-            padding: 50px 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .card {
-            background: rgba(23, 23, 27, 0.7);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .card h2 {
-            margin-bottom: 15px;
-            color: #00ff66;
-        }
-
-        .log-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 13px;
-            text-align: left;
-        }
-
-        .log-table th, .log-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(0, 255, 102, 0.2);
-        }
-
-        .log-table th {
-            color: #00ff66;
-        }
-
-        .log-table td {
-            color: #ddd;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            position: relative;
-            z-index: 1;
-        }
-        
-        #views, #user-ip {
-            color: #00ff66;
-            font-weight: bold;
-        }
-        
-        .ip-box {
-            font-size: 14px;
-            color: #aaa;
-            margin-top: 5px;
-        }
-    </style>
-</head>
-<body>
-
-    <canvas id="space-bg"></canvas>
-
-    <div class="hero">
-        <div class="profile">
-            <img class="avatar" src="IMG_20260419_061914_854.webp" alt="Profile Picture">
-            <h1>พี่ดำสุดหล่อ</h1>
-            <div id="typing"></div>
-            <p class="tag">ID: 6767</p>
-            <p class="ip-box">🕵️ YOUR IP: <span id="user-ip">LOADING...</span></p>
-            <div class="btns">
-                <a href="https://www.facebook.com/share/1DitXDcF4S/" target="_blank">Facebook</a>
-                <a href="https://www.instagram.com/noppakao_1122?igsh=OGtqbjZuY3RzenUw" target="_blank">Instagram</a>
-            </div>
-        </div>
-    </div>
-
-    <section>
-        <div class="card">
-            <h2>🕵️‍♂️ ประวัติการเข้าชมล่าสุด (แชร์ข้อมูลร่วมกันของทุกคน)</h2>
-            <div style="overflow-x: auto;">
-                <table class="log-table">
-                    <thead>
-                        <tr>
-                            <th>เลข IP ผู้เข้าชม</th>
-                            <th>เครือข่าย / ค่ายซิม</th>
-                            <th>วันที่ / เวลาเข้าชม</th>
-                        </tr>
-                    </thead>
-                    <tbody id="log-data">
-                        <tr>
-                            <td colspan="3" style="text-align:center; color:#666;">กำลังดึงฐานข้อมูลแฮกเกอร์ร่วมกัน...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>เกี่ยวกับผม</h2>
-            <p>ผมชื่อเจสันปีนี้อายุ 12 โขบงับ อยู่ ป.2 ชอบภาษาเขมรเพราะมันเมียงปร่ะจริงๆ</p>
-        </div>
-    </section>
-
-    <footer>
-        <p>© My Name It</p>
-        <p>👀 ผู้เข้าชมทั้งหมด: <span id="views">0</span> ครั้ง</p>
-    </footer>
-
-    <script>
-        // ระบบอวกาศขยับได้
-        const canvas = document.getElementById('space-bg');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
-        const numStars = 150;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        for (let i = 0; i < numStars; i++) {
-            stars.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 1.8,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: (Math.random() * 0.4) + 0.1,
-                alpha: Math.random()
-            });
-        }
-
-        function animateStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, canvas.width);
-            gradient.addColorStop(0, '#0a0e17');
-            gradient.addColorStop(1, '#020204');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = 0; i < numStars; i++) {
-                let s = stars[i];
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-                s.alpha += (Math.random() - 0.5) * 0.04;
-                if(s.alpha < 0.1) s.alpha = 0.1;
-                if(s.alpha > 1) s.alpha = 1;
-                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
-                if(i % 8 === 0) ctx.fillStyle = `rgba(0, 255, 102, ${s.alpha})`;
-                ctx.fill();
-                s.x += s.vx;
-                s.y += s.vy;
-                if (s.x < 0) s.x = canvas.width;
-                if (s.x > canvas.width) s.x = 0;
-                if (s.y < 0) s.y = canvas.height;
-                if (s.y > canvas.height) s.y = 0;
-            }
-            requestAnimationFrame(animateStars);
-        }
-        animateStars();
-
-        // ระบบตัวอักษรวิ่ง
-        const welcomeText = "ยินดีต้อนรับสู่เว็บไซต์ของพี่ดำสุดหล่อเท่";
-        const hackerText = ["ACCESS GRANTED", "CONNECTING...", "LOADING DATA...", "SYSTEM ONLINE", "WELCOME USER"];
-        let typingIndex = 0;
-        let hackerIndex = 0;
-        const typingElement = document.getElementById("typing");
-
-        function typeWriter() {
-            if (typingIndex < welcomeText.length) {
-                typingElement.innerHTML += welcomeText.charAt(typingIndex);
-                typingIndex++;
-                setTimeout(typeWriter, 80);
-            } else {
-                setTimeout(startHackerText, 2000);
-            }
-        }
-
-        function startHackerText() {
-            setInterval(() => {
-                typingElement.innerHTML = hackerText[hackerIndex];
-                hackerIndex++;
-                if (hackerIndex >= hackerText.length) {
-                    hackerIndex = 0;
-                }
-            }, 2000);
-        }
-
-        // ========================================================
-        // 🚀 ระบบแชร์ข้อมูลข้ามเครื่อง (IP + ค่ายซิม + เวลา) ไร้บั๊ก 100%
-        // ========================================================
-        const MASTER_KEY = "pydam_hacker_shared_logs_v2";
-
-        function runGlobalTracker() {
-            // ดักจับข้อมูลเครื่องนี้ก่อน
-            fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                const myIP = data.ip || "127.0.0.1";
-                document.getElementById('user-ip').innerText = myIP;
-
-                let provider = data.org || "ไม่ทราบค่าย";
-                if(provider.toLowerCase().includes("advanced info") || provider.toLowerCase().includes("ais")) provider = "AIS";
-                else if(provider.toLowerCase().includes("true internet") || provider.toLowerCase().includes("real move")) provider = "TRUE-H";
-                else if(provider.toLowerCase().includes("total access") || provider.toLowerCase().includes("dtac")) provider = "DTAC";
-                else if(provider.toLowerCase().includes("tot") || provider.toLowerCase().includes("cat telecom")) provider = "NT-Telecom";
-
-                const now = new Date();
-                const timeStr = now.toLocaleString('th-TH');
-
-                // ดึงคลังข้อมูลเก่าที่แชร์ร่วมกันในเบราว์เซอร์เครือข่ายจำลอง
-                let sharedLogs = localStorage.getItem(MASTER_KEY);
-                let logsArray = sharedLogs ? JSON.parse(sharedLogs) : [];
-
-                // แอดข้อมูลใหม่เข้าไปข้างบนสุด
-                logsArray.unshift({ ip: myIP, net: provider, time: timeStr });
-
-                // ล็อกความยาวประวัติไว้ 6 แถวล่าสุดพอ จะได้ไม่แน่นจอ
-                if(logsArray.length > 6) logsArray.pop();
-
-                // เซฟบันทึกเก็บกลับเข้าไปในคลังกลางของระบบ
-                localStorage.setItem(MASTER_KEY, JSON.stringify(logsArray));
-
-                // นำไปแสดงผลบนตารางให้เห็นทุกคนร่วมกัน
-                renderTable(logsArray);
-                document.getElementById('views').innerText = logsArray.length;
-            })
-            .catch(() => {
-                document.getElementById('user-ip').innerText = "127.0.0.1";
-                let sharedLogs = localStorage.getItem(MASTER_KEY);
-                renderTable(sharedLogs ? JSON.parse(sharedLogs) : []);
-            });
-        }
-
-        function renderTable(logs) {
-            let html = "";
-            if(logs.length === 0) {
-                html = "<tr><td colspan='3' style='text-align:center;'>ยังไม่มีประวัติล็อกอิน</td></tr>";
-            } else {
-                logs.forEach(item => {
-                    html += `<tr>
-                        <td style='color:#00ff66; font-weight:bold;'>${item.ip}</td>
-                        <td style='color:#ffcc00;'>${item.net}</td>
-                        <td>${item.time}</td>
-                    </tr>`;
-                });
-            }
-            document.getElementById('log-data').innerHTML = html;
-        }
-
-        window.onload = function() {
-            typeWriter();
-            runGlobalTracker();
-        };
-    </script>
-</body>
-</html>
+  // ดึงประวัติ IP ทั้งหมดมาพ่นออกหน้าจอ
+  const ipHistoryRef = ref(db, 'ip_history');
+  onValue(ipHistoryRef, (snapshot) => {
+    if(ipListEl) {
+      ipListEl.innerHTML = ""; 
+      const data = snapshot.val();
+      if(data) {
+        Object.values(data).reverse().forEach(item => {
+          const li = document.createElement("p"); 
+          li.innerText = item.ip;
+          li.style.color = "#00FF00"; // สีเขียวแบบหน้าเว็บเดิมมึง
+          li.style.margin = "5px 0";
+          ipListEl.appendChild(li);
+        });
+      }
+    }
+  });
+</script>
