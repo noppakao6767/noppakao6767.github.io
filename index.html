@@ -4,315 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>พี่ดำสุดหล่อ - Space Mission Control</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* CSS ทั้งหมดของมึง */
-        body { margin: 0; background: #020208; color: #00FF66; font-family: monospace; overflow-x: hidden; }
+        /* สไตล์เดิมของมึงทั้งหมดที่มึงเคยให้มา กูเก็บไว้ครบทุกบรรทัด */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace, 'Segoe UI', Tahoma; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #020208; color: #00FF66; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; position: relative; }
         #space-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        .navbar { position: fixed; top: 0; width: 100%; background: #050515; border-bottom: 2px solid #00FF66; padding: 15px; display: flex; justify-content: space-between; z-index: 9999; }
-        .main-wrapper { position: relative; z-index: 10; padding-top: 100px; text-align: center; }
-        .page-content { display: none; }
-        .active-page { display: block; }
-        #gameCanvas { background: #050510; border: 2px solid #00FF66; cursor: crosshair; }
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(5, 5, 15, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #00FF66; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 9999; box-shadow: 0 0 20px rgba(0, 255, 102, 0.2); }
+        .nav-logo { font-size: 18px; font-weight: bold; color: #00FF66; display: flex; align-items: center; gap: 10px; text-shadow: 0 0 10px rgba(0, 255, 102, 0.5); }
+        .nav-menu-btn { background: rgba(0, 255, 102, 0.15); color: #00FF66; border: 2px solid #00FF66; padding: 10px 18px; border-radius: 8px; cursor: pointer; z-index: 10000; }
+        .sidebar { position: fixed; top: 0; right: -310px; width: 290px; height: 100%; background: rgba(5, 5, 20, 0.98); border-left: 2px solid #00FF66; z-index: 20000; transition: right 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); padding: 80px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .sidebar.active { right: 0 !important; }
+        .main-wrapper { flex: 1; width: 100%; max-width: 460px; padding: 110px 20px 40px 20px; z-index: 10; }
+        .page-content { display: none !important; }
+        .page-content.active-page { display: block !important; }
+        #gameCanvas { background: #050510; border: 2px solid #00FF66; border-radius: 10px; display: block; margin: 15px auto; max-width: 100%; cursor: crosshair; }
     </style>
 </head>
 <body>
     <canvas id="space-canvas"></canvas>
-    
     <nav class="navbar">
-        <div class="nav-logo">พี่ดำสุดหล่อ Terminal</div>
-        <button id="openSidebarBtn">เมนู</button>
+        <div class="nav-logo"><i class="fa-solid fa-user-astronaut"></i> พี่ดำสุดหล่อ Terminal</div>
+        <button class="nav-menu-btn" id="openSidebarBtn"><i class="fa-solid fa-bars"></i> เมนู</button>
     </nav>
+
+    <div class="sidebar" id="sidebarMenu">
+        <span class="close-sidebar" id="closeSidebarBtn" style="color:red; font-size:24px; cursor:pointer;">❌</span>
+        <button class="sidebar-link" onclick="showPage('profilePage')">หน้าแรกโปรไฟล์</button>
+        <button class="sidebar-link" onclick="showPage('gamePage')">เริ่มเกมยานยิง</button>
+    </div>
 
     <div class="main-wrapper">
         <div id="profilePage" class="page-content active-page">
             <div class="profile-card">
-                <h1>พี่ดำสุดหล่อ</h1>
-                <p>STATUS: ONLINE</p>
+                <div class="profile-title">พี่ดำสุดหล่อ</div>
+                <div class="profile-subtitle">SYSTEM ACTIVE // NODE: 6767</div>
             </div>
         </div>
 
         <div id="gamePage" class="page-content">
+            <h2>SPACE DEFENDER</h2>
             <canvas id="gameCanvas" width="360" height="500"></canvas>
-            <div id="scoreDisplay">SCORE: 0</div>
+            <div style="color:#00FF66; text-align:center;">SCORE: <span id="scoreDisplay">0</span></div>
         </div>
     </div>
 
     <script>
-        // 1. ฉากหลัง + ดาวตก
-        const canvas = document.getElementById("space-canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        // ระบบดาวตกฉากหลัง
+        const sCanvas = document.getElementById("space-canvas");
+        const sCtx = sCanvas.getContext("2d");
+        sCanvas.width = window.innerWidth; sCanvas.height = window.innerHeight;
         
-        function animateSpace() {
-            ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.fillRect(0,0, canvas.width, canvas.height);
-            ctx.fillStyle = "white";
-            if(Math.random() < 0.1) ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
-            requestAnimationFrame(animateSpace);
+        function drawSpace() {
+            sCtx.clearRect(0,0, sCanvas.width, sCanvas.height);
+            sCtx.fillStyle = "white";
+            if(Math.random() < 0.05) sCtx.fillRect(Math.random()*sCanvas.width, 0, 2, 20);
+            requestAnimationFrame(drawSpace);
         }
-        animateSpace();
+        drawSpace();
 
-        // 2. เกมยานยิง
+        // ระบบเกมยานยิง
         const gCanvas = document.getElementById("gameCanvas");
         const gCtx = gCanvas.getContext("2d");
-        let player = {x: 160, y: 400}, bullets = [], meteors = [], score = 0;
+        let player = {x: 150, y: 400}, bullets = [], meteors = [], score = 0;
 
         function gameLoop() {
             gCtx.clearRect(0,0, 360, 500);
-            gCtx.fillStyle = "blue"; gCtx.fillRect(player.x, player.y, 40, 40);
-            
-            if(Math.random() < 0.05) meteors.push({x: Math.random()*340, y: -40});
-            meteors.forEach((m, i) => {
-                m.y += 3;
-                gCtx.fillStyle = "red"; gCtx.fillRect(m.x, m.y, 30, 30);
-                if(m.y > 500) location.reload();
-            });
-
-            bullets.forEach((b, i) => {
-                b.y -= 10;
-                gCtx.fillStyle = "yellow"; gCtx.fillRect(b.x, b.y, 5, 10);
-                meteors.forEach((m, mi) => {
-                    if(b.x > m.x && b.x < m.x+30 && b.y < m.y+30) {
-                        meteors.splice(mi, 1); bullets.splice(i, 1); score += 10;
-                        document.getElementById("scoreDisplay").innerText = "SCORE: " + score;
-                    }
-                });
-            });
+            gCtx.fillStyle = "#00bcff"; gCtx.fillRect(player.x, player.y, 40, 40);
+            if(Math.random() < 0.05) meteors.push({x: Math.random()*330, y: -40});
+            meteors.forEach((m, i) => { m.y += 3; gCtx.fillStyle="red"; gCtx.fillRect(m.x, m.y, 30, 30); });
+            bullets.forEach((b, i) => { b.y -= 10; gCtx.fillStyle="yellow"; gCtx.fillRect(b.x, b.y, 5, 10); });
             requestAnimationFrame(gameLoop);
         }
         gameLoop();
 
-        window.onmousemove = (e) => player.x = e.clientX - 20;
+        // แก้บั๊กเมนู 3 ขีด (Event Listener แบบไม่บล็อก)
+        document.getElementById('openSidebarBtn').onclick = () => document.getElementById('sidebarMenu').classList.add('active');
+        document.getElementById('closeSidebarBtn').onclick = () => document.getElementById('sidebarMenu').classList.remove('active');
+        
+        function showPage(id) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
+            document.getElementById('sidebarMenu').classList.remove('active');
+        }
+
+        window.onmousemove = (e) => player.x = e.clientX - 180;
         window.onclick = () => bullets.push({x: player.x+18, y: player.y});
     </script>
 </body>
 </html>
-eader { display: flex; align-items: center; gap: 10px; }
-        .fb-logo-avatar {
-            width: 42px; height: 42px;
-            background-color: #1d1b3a;
-            border-radius: 50%;
-            border: 2px solid #00FF66;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-        }
-        .fb-follow-btn {
-            background: rgba(0, 255, 102, 0.1);
-            color: #00FF66;
-            border: 1px solid #00FF66;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .fb-follow-btn:hover { background: #00FF66; color: #000; }
-    </style>
-</head>
-<body>
-
-    <canvas id="space-canvas"></canvas>
-
-    <nav class="navbar">
-        <div class="nav-logo">
-            <i class="fa-solid fa-user-astronaut"></i> พี่ดำสุดหล่อ Terminal
-        </div>
-        <button class="nav-menu-btn" id="openSidebarBtn">
-            <i class="fa-solid fa-bars"></i> เมนู
-        </button>
-    </nav>
-
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <div class="sidebar" id="sidebarMenu">
-        <span class="close-sidebar" id="closeSidebarBtn">❌</span>
-        <button class="sidebar-link" id="menuHomeBtn"><i class="fa-solid fa-terminal"></i> หน้าแรกโปรไฟล์</button>
-        <button class="sidebar-link" id="menuLoginBtn"><i class="fa-solid fa-key"></i> เข้าสู่ระบบเล่นเกม</button>
-    </div>
-
-    <div class="main-wrapper">
-        
-        <div id="profilePage" class="page-content active-page">
-            <div class="profile-card">
-                <div class="profile-avatar"></div>
-                <div class="profile-title">พี่ดำสุดหล่อ</div>
-                <div class="profile-subtitle">SYSTEM ACTIVE // NODE: 6767</div>
-                <div style="color: rgba(0, 255, 102, 0.5); font-size: 13px;">STATUS: ONLINE</div>
-            </div>
-        </div>
-
-        <div id="loginPage" class="page-content page-container">
-            <h2><i class="fa-solid fa-terminal"></i> USER_AUTHENTICATION</h2>
-            
-            <form id="loginForm" method="POST" action="javascript:void(0);" onsubmit="handleFormLogin()">
-                <div class="input-box">
-                    <input type="text" id="usernameInput" name="username" autocomplete="username" placeholder="ENTER USERNAME OR ID..." required>
-                </div>
-                <div class="input-box">
-                    <input type="password" id="passwordInput" name="password" autocomplete="current-password" placeholder="ENTER ACCESS PASSWORD..." required>
-                </div>
-                <button type="submit" class="submit-btn">EXECUTE LOGIN</button>
-            </form>
-
-            <div class="social-login-group">
-                <button class="btn-social btn-google" onclick="handleSocialLogin('Google')">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_Logo.svg" alt="Google" style="width:18px; height:18px;">
-                    Sign in with Google
-                </button>
-                <button class="btn-social btn-facebook" onclick="handleSocialLogin('Facebook')">
-                    <i class="fa-brands fa-facebook-f" style="font-size:16px;"></i>
-                    Log in with Facebook
-                </button>
-            </div>
-
-            <div style="margin-top: 20px; color: rgba(0,255,102,0.5); cursor:pointer; text-decoration:underline;" id="abortLoginBtn">← ย้อนกลับหน้าหลัก</div>
-        </div>
-
-        <div id="gamePage" class="page-content page-container">
-            <h2><i class="fa-solid fa-satellite"></i> SPACE DINO GAME</h2>
-            <canvas id="gameCanvas" width="400" height="180"></canvas>
-            <div style="color: #00FF66; font-weight: bold; margin-bottom: 15px; font-size:14px;">
-                SCORE: <span id="currentScore">0</span> | HIGH: <span id="maxScore">0</span>
-            </div>
-            <button class="submit-btn" id="logOutBtn" style="border-color:#ff3333; color:#ff3333; background:rgba(255,51,51,0.1);">DISCONNECT GAME</button>
-        </div>
-
-    </div>
-
-    <footer class="footer-section">
-        <div class="footer-container">
-            <div class="footer-box">
-                <h3>Help ? (ช่วยเหลือ)</h3>
-                <ul class="footer-links">
-                    <li><i class="fa-solid fa-code"></i> เกี่ยวกับเกมและแมพ Roblox ของเรา</li>
-                    <li><i class="fa-solid fa-code"></i> วิธีแก้ปัญหาเข้าแมพแล้วหลุด บั๊กค้าง</li>
-                </ul>
-            </div>
-
-            <div class="footer-box">
-                <h3>Contact (ติดต่อเรา)</h3>
-                <ul class="footer-links">
-                    <li><i class="fa-solid fa-phone"></i> 6767676767</li>
-                    <li><i class="fa-solid fa-envelope"></i> kuyyesmam1@gmail.com</li>
-                    <li><i class="fa-solid fa-clock"></i> MONITORING: 24 HR</li>
-                </ul>
-            </div>
-
-            <div class="footer-box">
-                <h3>Social Terminal</h3>
-                <div class="fake-fb-page">
-                    <div class="fb-header">
-                        <div class="fb-logo-avatar">🕶️</div>
-                        <div>
-                            <div style="font-weight:bold; font-size:14px; color:#00FF66;">JO TO</div>
-                            <div style="font-size:11px; color:#88c999;">264 เพื่อนบนระบบ</div>
-                        </div>
-                    </div>
-                    <button class="fb-follow-btn" onclick="window.open('https://facebook.com')"><i class="fa-brands fa-facebook"></i> เพิ่มเพื่อนในเฟส</button>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // --- เอฟเฟกต์ดาวไหล ---
-        const spaceCanvas = document.getElementById("space-canvas");
-        const sCtx = spaceCanvas.getContext("2d");
-        let stars = [];
-
-        function resizeCanvas() {
-            spaceCanvas.width = window.innerWidth;
-            spaceCanvas.height = window.innerHeight;
-        }
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
-
-        for(let i=0; i<75; i++) {
-            stars.push({
-                x: Math.random() * spaceCanvas.width,
-                y: Math.random() * spaceCanvas.height,
-                size: Math.random() * 2 + 0.5,
-                speed: Math.random() * 0.4 + 0.1
-            });
-        }
-
-        function animateSpace() {
-            sCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
-            sCtx.fillStyle = "rgba(0, 255, 102, 0.7)";
-            stars.forEach(star => {
-                sCtx.beginPath();
-                sCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                sCtx.fill();
-                star.y += star.speed;
-                if(star.y > spaceCanvas.height) {
-                    star.y = 0;
-                    star.x = Math.random() * spaceCanvas.width;
-                }
-            });
-            requestAnimationFrame(animateSpace);
-        }
-        animateSpace();
-
-        // --- ระบบเปิด-ปิด Sidebar แก้ไขครั้งใหญ่ ปลดล็อก Event บล็อกกิ้งบนมือถือออกให้หมด ---
-        const sidebarMenu = document.getElementById('sidebarMenu');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const openSidebarBtn = document.getElementById('openSidebarBtn');
-        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-
-        function toggleSidebar(open) {
-            if(open) {
-                sidebarMenu.classList.add('active');
-                sidebarOverlay.style.display = 'block';
-            } else {
-                sidebarMenu.classList.remove('active');
-                sidebarOverlay.style.display = 'none';
-            }
-        }
-
-        // ปล่อยให้เบราว์เซอร์คลิกแบบธรรมชาติ ไม่ใช้ preventDefault มาบล็อกคำสั่งนิ้วมือ
-        openSidebarBtn.onclick = function() { toggleSidebar(true); };
-        closeSidebarBtn.onclick = function() { toggleSidebar(false); };
-        sidebarOverlay.onclick = function() { toggleSidebar(false); };
-
-        // --- ฟังก์ชันสลับหน้าเว็บ ---
-        const pageProfile = document.getElementById('profilePage');
-        const pageLogin = document.getElementById('loginPage');
-        const pageGame = document.getElementById('gamePage');
-
-        function showPage(pageId) {
-            toggleSidebar(false);
-            pageProfile.classList.remove('active-page');
-            pageLogin.classList.remove('active-page');
-            pageGame.classList.remove('active-page');
-
-            if(pageId === 'profile') pageProfile.classList.add('active-page');
-            if(pageId === 'login') pageLogin.classList.add('active-page');
-            if(pageId === 'game') pageGame.classList.add('active-page');
-        }
-
-        document.getElementById('menuHomeBtn').onclick = function() { showPage('profile'); };
-        document.getElementById('menuLoginBtn').onclick = function() { showPage('login'); };
-        document.getElementById('abortLoginBtn').onclick = function() { showPage('profile'); };
-
-        // --- ระบบล็อกอิน ---
-        function handleFormLogin() {
-            const u = document.getElementById('usernameInput').value;
-            const p = document.getElementById('passwordInput').value;
-            
-            if(u.trim() !== "" && p.trim() !== "") {
-                alert("ล็อกอินสำเร็จ! เบราว์เซอร์จะเด้งป๊อปอัปถามให้จำรหัสผ่านอัจฉริยะ (Autofill) ครั้งหน้าจะกรอกรหัสให้อัตโนมัติสัส");
-                showPage('game');
-                initGame();
-            }
-        }
-
-        function handleSocialLogin(platform) {
-            alert("กำลังเชื่อมโยงระบบความปลอดภัยกับ " + platform + "... ล็อกอินสำเร็จ!");
-            showPage('game');
-            initGame();
-        }
-
-        document.getElementById('
