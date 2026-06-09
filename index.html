@@ -4,16 +4,47 @@
     <meta charset="UTF-8">
     <title>Noppakao Terminal</title>
     <style>
-        body { background-color: #050505; color: #00FF66; font-family: 'Courier New', monospace; text-align: center; }
-        .box { border: 2px solid #00FF66; border-radius: 20px; padding: 20px; width: 80%; margin: 50px auto; box-shadow: 0 0 10px #00FF66; }
-        img { width: 150px; border-radius: 50%; border: 2px solid #00FF66; }
+        body { background: #000; color: #00FF66; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; }
+        #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .main-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .box { border: 2px solid #00FF66; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 0 15px #00FF66; background: rgba(0,0,0,0.8); }
+        .profile-img { width: 120px; border-radius: 50%; border: 2px solid #00FF66; }
+        .menu-bar { position: absolute; top: 20px; right: 20px; }
+        button { background: #00FF66; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <img src="IMG_20260419_061914_854.webp" alt="Profile">
-        <h1>พี่ดำสุดหล่อ</h1>
-        <p>SYSTEM ONLINE</p>
+
+    <canvas id="stars"></canvas>
+
+    <div class="menu-bar">
+        <button onclick="alert('ระบบ Login เชื่อมต่อ Firebase/Google')">เข้าสู่ระบบ / ลงชื่อเข้าใช้</button>
     </div>
+
+    <div class="main-container">
+        <div class="box">
+            <img src="IMG_20260419_061914_854.webp" class="profile-img">
+            <h1>พี่ดำสุดหล่อ</h1>
+            <p>SYSTEM ACTIVE // STATUS: ONLINE</p>
+        </div>
+    </div>
+
+    <script>
+        // สร้างดาวตก
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        function draw() {
+            ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            for(let i=0; i<50; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, 1, 0, Math.PI*2);
+                ctx.fill();
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    </script>
 </body>
 </html>
